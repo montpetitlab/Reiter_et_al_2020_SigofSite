@@ -1,0 +1,14 @@
+https://ftp.ncbi.nlm.nih.gov/genomes/genbank/fungi/Saccharomyces_cerevisiae/latest_assembly_versions/GCA_000146045.2_R64/GCA_000146045.2_R64_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/003/745/GCA_000003745.2_12X/GCA_000003745.2_12X_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/968/475/GCA_000968475.1_Huva2.0/GCA_000968475.1_Huva2.0_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/genbank/fungi/Aureobasidium_pullulans/latest_assembly_versions/GCA_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0/GCA_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/004/917/305/GCA_004917305.1_ASM491730v1/GCA_004917305.1_ASM491730v1_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/002/024/125/GCA_002024125.1_ASM202412v1/GCA_002024125.1_ASM202412v1_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/142/805/GCF_000142805.1_ASM14280v1/GCF_000142805.1_ASM14280v1_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/genbank/fungi/Pichia_kudriavzevii/latest_assembly_versions/GCA_003054445.1_ASM305444v1/GCA_003054445.1_ASM305444v1_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/genbank/fungi/Botrytis_cinerea/latest_assembly_versions/GCA_000349525.1_BcDW1/GCA_000349525.1_BcDW1_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/143/535/GCA_000143535.4_ASM14353v4/GCA_000143535.4_ASM14353v4_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/002/894/445/GCA_002894445.1_ASM289444v1/GCA_002894445.1_ASM289444v1_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/002/921/095/GCA_002921095.1_ASM292109v1/GCA_002921095.1_ASM292109v1_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/001/749/795/GCA_001749795.1_ASM174979v1/GCA_001749795.1_ASM174979v1_genomic.gtf.gz
+https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/003/325/415/GCA_003325415.1_Rstol_CA/GCA_003325415.1_Rstol_CA_genomic.gtf.gz
