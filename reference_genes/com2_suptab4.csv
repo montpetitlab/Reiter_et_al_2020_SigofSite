@@ -1,0 +1,512 @@
+﻿gene,ORF,log2fc,Function
+,,,
+CYS3,YAL012W,2.13,"Cystathionine gamma-lyase, catalyzes one of the two reactions involved in the transsulfuration pathway that yields cysteine from homocysteine with the intermediary formation of cystathionine"
+NTG1,YAL015C,2.37,DNA N-glycosylase and apurinic/apyrimidinic (AP) lyase involved in base excision repair; acts in both nucleus and mitochondrion; creates a double-strand break at mtDNA origins that stimulates replication in response to oxidative stress
+GIP4,YAL031C,2.11,Cytoplasmic Glc7-interacting protein whose overexpression relocalizes Glc7p from the nucleus and prevents chromosome segregation; potential Cdc28p substrate
+GEM1,YAL048C,2.95,"Outer mitochondrial membrane GTPase, subunit of the ERMES complex; potential regulatory subunit of the ERMES complex that links the ER to mitochondria and may promote inter-organellar calcium and phospholipid exchange as well as coordinating mitochondrial DNA replication and growth; cells lacking Gem1p contain collapsed, globular, or grape-like mitochondria; ortholog of metazoan Miro GTPases"
+SEO1,YAL067C,4.73,"Putative permease, member of the allantoate transporter subfamily of the major facilitator superfamily; mutation confers resistance to ethionine sulfoxide"
+DMA2,YNL116W,5.93,"Ubiquitin-protein ligase (E3); controls septin dynamics and the spindle position checkpoint (SPOC) along with functionally redundant ligase Dma1p by regulating the recruitment of Elm1p to the bud neck; regulates levels of the translation initiation factor eIF2 subunit Gcd11p, as well as abundance, localization, and ubiquitination of Cdk inhibitory kinase Swe1p; ortholog of human RNF8 protein, with sequence similarity to human Chfr; contains FHA and RING finger domains"
+KIN3,YAR018C,3.4,Nonessential serine/threonine protein kinase; possible role in DNA damage response
+HTB2,YBL002W,2.47,"Histone H2B, core histone protein required for chromatin assembly and chromosome function; nearly identical to HTB1; Rad6p-Bre1p-Lge1p mediated ubiquitination regulates transcriptional activation, meiotic DSB formation and H3 methylation"
+RIB1,YBL033C,2.18,GTP cyclohydrolase II; catalyzes the first step of the riboflavin biosynthesis pathway
+SAS3,YBL052C,2.1,"Histone acetyltransferase catalytic subunit of NuA3 complex that acetylates histone H3, involved in transcriptional silencing; homolog of the mammalian MOZ proto-oncogene; mutant has aneuploidy tolerance; sas3gcn5 double mutation is lethal"
+YEL1,YBL060W,2.16,Guanine nucleotide exchange factor specific for Arf3p; localized to the bud neck and tip; required for localization of Arf3p to the bud neck and tip
+SKT5,YBL061C,2.14,"Activator of Chs3p (chitin synthase III), recruits Chs3p to the bud neck via interaction with Bni4p; has similarity to Shc1p, which activates Chs3p during sporulation"
+KTI11,YBL071W-A,2.14,"Zn-ribbon protein that co-purifies with Dph1 and Dph2 in a complex required for synthesis of diphthamide on translation factor eEF2 and with Elongator subunits Iki3p, Elp2p, and Elp3p involved in modification of wobble nucleosides in tRNAs"
+,YBL095W,2.67,YBL095W
+RTG3,YBL103C,2.75,"Basic helix-loop-helix-leucine zipper (bHLH/Zip) transcription factor that forms a complex with another bHLH/Zip protein, Rtg1p, to activate the retrograde (RTG) and TOR pathways"
+UGA2,YBR006W,2.58,Succinate semialdehyde dehydrogenase involved in the utilization of gamma-aminobutyrate (GABA) as a nitrogen source; part of the 4-aminobutyrate and glutamate degradation pathways; localized to the cytoplasm
+DSF2,YBR007C,2.3,Deletion suppressor of mpt5 mutation
+FLR1,YBR008C,2.51,"Plasma membrane multidrug transporter of the major facilitator superfamily, involved in efflux of fluconazole, diazaborine, benomyl, methotrexate, and other drugs; expression induced in cells treated with the mycotoxin patulin"
+RKM3,YBR030W,3.33,Ribosomal lysine methyltransferase specific for monomethylation of Rpl42ap and Rpl42bp (lysine 40); nuclear SET domain containing protein
+CHS2,YBR038W,2.84,Chitin synthase II; catalyzes transfer of N-acetylglucosamine (GlcNAc) to chitin upon activation of zymogenic form; required for chitin synthesis in the primary septum during cytokinesis; localization regulated by Cdk1p during mitosis
+QDR3,YBR043C,2.09,"Multidrug transporter of the major facilitator superfamily, has a role in polyamine homeostasis; expression is upregulated under polyamine stress; required for resistance to quinidine, barban, cisplatin, and bleomycin"
+TCM62,YBR044C,2.06,Protein involved in the assembly of the mitochondrial succinate dehydrogenase complex; putative chaperone
+ZTA1,YBR046C,3.74,"NADPH-dependent quinone reductase, GFP-tagged protein localizes to the cytoplasm and nucleus; has similarity to E, coli quinone oxidoreductase and to human zeta-crystallin"
+TEC1,YBR083W,2.76,"Transcription factor targeting filamentation genes and Ty1 expression; Ste12p activation of most filamentation gene promoters depends on Tec1p and Tec1p transcriptional activity is dependent on its association with Ste12p; binds to TCS elements upstream of filamentation genes, which are regulated by Tec1p/Ste12p/Dig1p complex; competes with Dig2p for binding to Ste12p/Dig1p; positive regulator of chronological life span; TEA/ATTS DNA-binding domain family member"
+ARG3,YJL088W,5.18,"Ornithine carbamoyltransferase (carbamoylphosphate:L-ornithine carbamoyltransferase), catalyzes the sixth step in the biosynthesis of the arginine precursor ornithine"
+SIF2,YBR103W,2.41,"WD40 repeat-containing subunit of the Set3C histone deacetylase complex, which represses early/middle sporulation genes; antagonizes telomeric silencing; binds specifically to the Sir4p N-terminus"
+YMC2,YBR104W,3.32,"Mitochondrial protein, putative inner membrane transporter with a role in oleate metabolism and glutamate biosynthesis; member of the mitochondrial carrier (MCF) family; has similarity with Ymc1p"
+LYS2,YBR115C,2.22,"Alpha aminoadipate reductase, catalyzes the reduction of alpha-aminoadipate to alpha-aminoadipate 6-semialdehyde, which is the fifth step in biosynthesis of lysine; activation requires posttranslational phosphopantetheinylation by Lys5p"
+HSL7,YBR133C,2.72,"Protein arginine N-methyltransferase that exhibits septin and Hsl1p-dependent bud neck localization and periodic Hsl1p-dependent phosphorylation; required along with Hsl1p for bud neck recruitment, phosphorylation, and degradation of Swe1p"
+,YBR138C,3.4,YBR138C
+ADH5,YBR145W,2.19,Alcohol dehydrogenase isoenzyme V; involved in ethanol production
+MET8,YBR213W,4.88,"Bifunctional dehydrogenase and ferrochelatase, involved in the biosynthesis of siroheme, a prosthetic group used by sulfite reductase; required for sulfate assimilation and methionine biosynthesis"
+YSW1,YBR148W,3.42,"Protein required for normal prospore membrane formation; interacts with Gip1p, which is the meiosis-specific regulatory subunit of the Glc7p protein phosphatase; expressed specifically in spores and localizes to the prospore membrane"
+RIB7,YBR153W,2.43,Diaminohydroxyphoshoribosylaminopyrimidine deaminase; catalyzes the second step of the riboflavin biosynthesis pathway
+SLI15,YBR156C,2.22,"Subunit of the conserved chromosomal passenger complex (CPC; Ipl1p-Sli15p-Bir1p-Nbl1p), which regulates kinetochore-microtubule attachments, activation of the spindle tension checkpoint, and mitotic spindle disassembly"
+UBS1,YBR165W,2.47,Ubiquitin-conjugating enzyme suppressor that functions as a general positive regulator of Cdc34p activity; nuclear protein that may represent a link between nucleocytoplasmic transport and ubiquitin ligase activity
+EEB1,YPL095C,4.87,Acyl-coenzymeA:ethanol O-acyltransferase responsible for the major part of medium-chain fatty acid ethyl ester biosynthesis during fermentation; possesses short-chain esterase activity; may be involved in lipid metabolism and detoxification
+MOG1,YJR074W,4.69,"Conserved nuclear protein that interacts with GTP-Gsp1p, which is a Ran homolog of the Ras GTPase family, and stimulates nucleotide release, involved in nuclear protein import, nucleotide release is inhibited by Yrb1p"
+EHT1,YBR177C,4.57,Acyl-coenzymeA:ethanol O-acyltransferase that plays a minor role in medium-chain fatty acid ethyl ester biosynthesis; possesses short-chain esterase activity; localizes to lipid particles and the mitochondrial outer membrane
+POS5,YPL188W,4.51,"Mitochondrial NADH kinase, phosphorylates NADH; also phosphorylates NAD(+) with lower specificity; required for the response to oxidative stress"
+RIB5,YBR256C,2.07,Riboflavin synthase; catalyzes the last step of the riboflavin biosynthesis pathway
+CTP1,YBR291C,2.44,"Mitochondrial inner membrane citrate transporter, member of the mitochondrial carrier family"
+VBA2,YBR293W,2.29,Permease of basic amino acids in the vacuolar membrane
+SUL1,YBR294W,11.44,"High affinity sulfate permease of the SulP anion transporter family; sulfate uptake is mediated by specific sulfate transporters Sul1p and Sul2p, which control the concentration of endogenous activated sulfate intermediates"
+DBF20,YPR111W,4.42,"Ser/Thr kinase involved in late nuclear division, one of the mitotic exit network (MEN) proteins; necessary for the execution of cytokinesis; also plays a role in regulating the stability of SWI5 and CLB2 mRNAs"
+SGF29,YCL010C,2.63,"Component of the HAT/Core module of the SAGA, SLIK, and ADA complexes; HAT/Core module also contains Gcn5p, Ngg1p, and Ada2p; binds methylated histone H3K4; involved in transcriptional regulation through SAGA and TBP recruitment to target promoters and H3 acetylation"
+FUS1,YCL027W,3.5,"Membrane protein localized to the shmoo tip, required for cell fusion; expression regulated by mating pheromone; proposed to coordinate signaling, fusion, and polarization events required for fusion; potential Cdc28p substrate"
+ZAP1,YJL056C,4.33,"Zinc-regulated transcription factor; binds to zinc-responsive promoters to induce transcription of certain genes in presence of zinc, represses other genes in low zinc; regulates its own transcription; contains seven zinc-finger domains"
+CHA1,YCL064C,23.02,"Catabolic L-serine (L-threonine) deaminase, catalyzes the degradation of both L-serine and L-threonine; required to use serine or threonine as the sole nitrogen source, transcriptionally induced by serine and threonine"
+,YCR023C,2.26,YCR023C
+HCM1,YCR065W,2.49,"Forkhead transcription factor that drives S-phase specific expression of genes involved in chromosome segregation, spindle dynamics, and budding; suppressor of calmodulin mutants with specific SPB assembly defects; telomere maintenance role"
+SSK22,YCR073C,3.25,"MAP kinase kinase kinase of the HOG1 mitogen-activated signaling pathway; functionally redundant with, and homologous to, Ssk2p; interacts with and is activated by Ssk1p; phosphorylates Pbs2p"
+ERS1,YCR075C,2.32,"Protein with similarity to human cystinosin, which is a H(+)-driven transporter involved in L-cystine export from lysosomes and implicated in the disease cystinosis; contains seven transmembrane domains"
+FIG2,YCR089W,4.3,"Cell wall adhesin, expressed specifically during mating; may be involved in maintenance of cell wall integrity during mating"
+,YCR099C,2.67,YCR099C
+,YCR100C,2.55,YCR100C
+,YCR101C,2.01,YCR101C
+RDS1,YCR106W,2.91,Putative zinc cluster transcription factor; involved in conferring resistance to cycloheximide
+AAD3,YCR107W,2.41,"Putative aryl-alcohol dehydrogenase; similar to P, chrysosporium aryl-alcohol dehydrogenase; mutational analysis has not yet revealed a physiological role"
+AAD15 ,YCR107W,3.3,"Putative aryl-alcohol dehydrogenase; similar to P, chrysosporium aryl-alcohol dehydrogenase; mutational analysis has not yet revealed a physiological role /// Putative aryl-alcohol dehydrogenase; similar to P, chrysosporium aryl-alcohol dehydrogenase; mutational analysis has not yet revealed a physiological role"
+AAD3,YCR107W,2.86,"Putative aryl-alcohol dehydrogenase; similar to P, chrysosporium aryl-alcohol dehydrogenase; mutational analysis has not yet revealed a physiological role"
+MCH1,YDL054C,3.86,"Protein with similarity to mammalian monocarboxylate permeases, which are involved in transport of monocarboxylic acids across the plasma membrane; mutant is not deficient in monocarboxylate transport"
+RAD59,YDL059C,6.19,Protein involved in the repair of double-strand breaks in DNA during vegetative growth via recombination and single-strand annealing; anneals complementary single-stranded DNA; homologous to Rad52p
+IDP1,YDL066W,2.18,"Mitochondrial NADP-specific isocitrate dehydrogenase, catalyzes the oxidation of isocitrate to alpha-ketoglutarate; not required for mitochondrial respiration and may function to divert alpha-ketoglutarate to biosynthetic processes"
+THI3,YDL080C,2.04,"Probable alpha-ketoisocaproate decarboxylase, may have a role in catabolism of amino acids to long-chain and complex alcohols; required for expression of enzymes involved in thiamine biosynthesis"
+,YER039C-A,4.13,YER039C-A
+LYS21,YDL131W,2.41,"Homocitrate synthase isozyme, catalyzes the condensation of acetyl-CoA and alpha-ketoglutarate to form homocitrate, which is the first step in the lysine biosynthesis pathway; highly similar to the other isozyme, Lys20p"
+BPL1,YDL141W,2.64,"Biotin:apoprotein ligase, covalently modifies proteins with the addition of biotin, required for acetyl-CoA carboxylase (Acc1p) holoenzyme formation"
+CRD1,YDL142C,2.32,"Cardiolipin synthase; produces cardiolipin, which is a phospholipid of the mitochondrial inner membrane that is required for normal mitochondrial membrane potential and function; also required for normal vacuolar ion homeostasis"
+LYS20,YDL182W,2.3,"Homocitrate synthase isozyme, catalyzes the condensation of acetyl-CoA and alpha-ketoglutarate to form homocitrate, which is the first step in the lysine biosynthesis pathway; highly similar to the other isozyme, Lys21p"
+NRM1,YNR009W,4.09,Transcriptional co-repressor of MBF (MCB binding factor)-regulated gene expression; Nrm1p associates stably with promoters via MBF to repress transcription upon exit from G1 phase
+GLE1,YDL207W,2.05,"Cytoplasmic nucleoporin required for polyadenylated RNA export; not essential for protein import; contains a nuclear export signal; when bound to inositol hexakisphosphate (IP6), functions as an activator for the Dbp5p ATPase activity at the nuclear pore complex during mRNA export"
+WHI4,YDL224C,2.09,Putative RNA binding protein and partially redundant Whi3p homolog that regulates the cell size requirement for passage through Start and commitment to cell division
+HO,YDL227C,2.13,"Site-specific endonuclease required for gene conversion at the MAT locus (homothallic switching) through the generation of a ds DNA break; expression restricted to mother cells in late G1 as controlled by Swi4p-Swi6p, Swi5p and Ash1p"
+PTP1,YDL230W,3.17,"Phosphotyrosine-specific protein phosphatase that dephosphorylates a broad range of substrates in vivo, including Fpr3p; localized to the cytoplasm and the mitochondria; proposed to be a negative regulator of filamentation"
+BRE4,YDL231C,2.35,"Zinc finger protein containing five transmembrane domains; null mutant exhibits strongly fragmented vacuoles and sensitivity to brefeldin A, a drug which is known to affect intracellular transport"
+ADY3,YDL239C,2.23,"Protein required for spore wall formation, thought to mediate assembly of a Don1p-containing structure at the leading edge of the prospore membrane via interaction with spindle pole body components; potentially phosphorylated by Cdc28p"
+RAD28,YDR030C,2.87,"Protein involved in DNA repair, related to the human CSA protein that is involved in transcription-coupled repair nucleotide excision repair"
+LYS14,YDR034C,2.36,Transcriptional activator involved in regulation of genes of the lysine biosynthesis pathway; requires 2-aminoadipate semialdehyde as co-inducer
+RAD55,YDR076W,5.11,Protein that stimulates strand exchange by stabilizing the binding of Rad51p to single-stranded DNA; involved in the recombinational repair of double-strand breaks in DNA during vegetative growth and meiosis; forms heterodimer with Rad57p
+VAC17,YCL063W,3.82,Phosphoprotein involved in vacuole inheritance; degraded in late M phase of the cell cycle; acts as a vacuole-specific receptor for myosin Myo2p
+TRS85,YDR108W,2.25,"Subunit of TRAPPIII (transport protein particle), a multimeric guanine nucleotide-exchange factor for Ypt1p, required for membrane expansion during autophagy and the CVT pathway; directs Ypt1p to the PAS; late post-replication meiotic role"
+INO2,YDR123C,4.26,"Component of the heteromeric Ino2p/Ino4p basic helix-loop-helix transcription activator that binds inositol/choline-responsive elements (ICREs), required for derepression of phospholipid biosynthetic genes in response to inositol depletion"
+,YDR124W,4.32,YDR124W
+SWI5,YDR146C,4.33,Transcription factor that recruits the Mediator and Swi/Snf complexes; activates transcription of genes expressed at the M/G1 phase boundary and in G1 phase; required for expression of the HO gene controlling mating type switching; localization to the nucleus occurs during G1 and appears to be regulated by phosphorylation by Cdc28p kinase
+EKI1,YDR147W,2.9,"Ethanolamine kinase, primarily responsible for phosphatidylethanolamine synthesis via the CDP-ethanolamine pathway; exhibits some choline kinase activity, thus contributing to phosphatidylcholine synthesis via the CDP-choline pathway"
+,YDR179W-A,3.29,YDR179W-A
+CRF1,YDR223W,2.01,Transcriptional corepressor involved in repression of ribosomal protein (RP) gene transcription via the TOR signaling pathway which promotes accumulation of Crf1p in the nucleus; role in repression of RP genes varies by strain
+LYS4,YDR234W,3.03,"Homoaconitase, catalyzes the conversion of homocitrate to homoisocitrate, which is a step in the lysine biosynthesis pathway"
+PEX5,YDR244W,2.7,"Peroxisomal membrane signal receptor for the C-terminal tripeptide signal sequence (PTS1) of peroxisomal matrix proteins, required for peroxisomal matrix protein import; also proposed to have PTS1-receptor independent functions"
+,YDR249C,2.78,YDR249C
+MET32,YDR253C,8.23,"Zinc-finger DNA-binding protein, involved in transcriptional regulation of the methionine biosynthetic genes, similar to Met31p"
+CHL4,YDR254W,2.84,"Outer kinetochore protein required for chromosome stability; involved in new kinetochore assembly and sister chromatid cohesion; peripheral component of the Ctf19 kinetochore subcomplex that interacts with Ctf19p, Ctf3p, Iml3p and Mif2p"
+GIC2,YDR309C,4.07,"Redundant rho-like GTPase Cdc42p effector; homolog of Gic1p; involved in initiation of budding and cellular polarization; interacts with Cdc42p via the Cdc42/Rac-interactive binding (CRIB) domain and with PI(4,5)P2 via a polybasic region"
+TRP4,YDR354W,4.14,"Anthranilate phosphoribosyl transferase of the tryptophan biosynthetic pathway, catalyzes the phosphoribosylation of anthranilate, subject to the general control system of amino acid biosynthesis"
+ARO10,YDR380W,2.17,"Phenylpyruvate decarboxylase, catalyzes decarboxylation of phenylpyruvate to phenylacetaldehyde, which is the first specific step in the Ehrlich pathway"
+TRS120,YDR407C,2.06,One of 10 subunits of the transport protein particle (TRAPP) complex of the cis-Golgi which mediates vesicle docking and fusion; involved in endoplasmic reticulum (ER) to Golgi membrane traffic
+YHP1,YDR451C,8.9,"One of two homeobox transcriptional repressors (see also Yox1p), that bind to Mcm1p and to early cell cycle box (ECB) elements of cell cycle regulated genes, thereby restricting ECB-mediated transcription to the M/G1 interval"
+PFA5,YDR459C,2.26,Palmitoyltransferase with autoacylation activity; likely functions in pathway(s) outside Ras; member of a family of putative palmitoyltransferases containing an Asp-His-His-Cys-cysteine rich (DHHC-CRD) domain
+DIG2,YDR480W,2.01,"MAP kinase-responsive inhibitor of the Ste12p transcription factor, involved in the regulation of mating-specific genes and the invasive growth pathway; related regulators Dig1p and Dig2p bind to Ste12p"
+PHO8,YDR481C,2.02,"Repressible vacuolar alkaline phosphatase; regulated by levels of Pi and by Pho4p, Pho9p, Pho80p, Pho81p and Pho85p; dephosphorylates phosphotyrosyl peptides; contributes to NAD+ metabolism by producing nicotinamide riboside from NMN"
+IZH1,YDR492W,2.58,"Membrane protein involved in zinc ion homeostasis, member of the four-protein IZH family; transcription is regulated directly by Zap1p, expression induced by zinc deficiency and fatty acids; deletion increases sensitivity to elevated zinc"
+ITR1,YDR497C,2.83,"Myo-inositol transporter with strong similarity to the minor myo-inositol transporter Itr2p, member of the sugar transporter superfamily; expression is repressed by inositol and choline via Opi1p and derepressed via Ino2p and Ino4p"
+SAM2,YDR502C,9.25,"S-adenosylmethionine synthetase, catalyzes transfer of the adenosyl group of ATP to the sulfur atom of methionine; one of two differentially regulated isozymes (Sam1p and Sam2p)"
+RBA50,YDR527W,2.22,"Protein involved in transcription; interacts with RNA polymerase II subunits Rpb2p, Rpb3, and Rpb11p; has similarity to human RPAP1"
+APA2,YDR530C,2.02,"Diadenosine 5',5''-P1,P4-tetraphosphate phosphorylase II (AP4A phosphorylase), involved in catabolism of bis(5'-nucleosidyl) tetraphosphates; has similarity to Apa1p"
+FIT1,YDR534C,2.15,"Mannoprotein that is incorporated into the cell wall via a glycosylphosphatidylinositol (GPI) anchor, involved in the retention of siderophore-iron in the cell wall"
+SHR5,YOL110W,3.67,"Subunit of a palmitoyltransferase, composed of Shr5p and Erf2p, that adds a palmitoyl lipid moiety to heterolipidated substrates such as Ras1p and Ras2p through a thioester linkage; palmitoylation is required for Ras2p membrane localization"
+TCA17,YEL048C,2.06,"Subunit of TRAPPII, a multimeric GEF involved in intra-Golgi and endosome-to-Golgi transport; promotes association of TRAPPII-specific subunits with the core complex; sedlin related; human Sedlin mutations cause SEDT, a skeletal disorder"
+CAN1,YEL063C,2.05,"Plasma membrane arginine permease, requires phosphatidyl ethanolamine (PE) for localization, exclusively associated with lipid rafts; mutation confers canavanine resistance"
+RMD6,YEL072W,6.02,Protein required for sporulation
+,YEL073C,3.67,YEL073C
+ISC1,YER019W,2.15,"Mitochondrial membrane localized inositol phosphosphingolipid phospholipase C, hydrolyzes complex sphingolipids to produce ceramide; activated by phosphatidylserine, cardiolipin, and phosphatidylglycerol; mediates Na+ and Li+ halotolerance"
+FIR1,YER032W,2.07,"Protein involved in 3' mRNA processing, interacts with Ref2p; potential Cdc28p substrate"
+HVG1,YER039C,4.28,"Protein of unknown function, has homology to Vrg4p"
+MET22,YOL064C,3.45,"Bisphosphate-3'-nucleotidase, involved in salt tolerance and methionine biogenesis; dephosphorylates 3'-phosphoadenosine-5'-phosphate and 3'-phosphoadenosine-5'-phosphosulfate, intermediates of the sulfate assimilation pathway"
+GLN3,YER040W,2.82,"Transcriptional activator of genes regulated by nitrogen catabolite repression (NCR), localization and activity regulated by quality of nitrogen source"
+MXR1,YER042W,4.91,"Methionine-S-sulfoxide reductase, involved in the response to oxidative stress; protects iron-sulfur clusters from oxidative inactivation along with MXR2; involved in the regulation of lifespan"
+HOM3,YER052C,2.31,Aspartate kinase (L-aspartate 4-P-transferase); cytoplasmic enzyme that catalyzes the first step in the common pathway for methionine and threonine biosynthesis; expression regulated by Gcn4p and the general control of amino acid synthesis
+MOT2,YER068W,2.34,"Ubiquitin-protein ligase subunit of the CCR4-NOT complex; with Ubc4p, ubiquitinates nascent polypeptide-associated complex subunits and histone demethyase Jhd2p; CCR4-NOT has roles in transcription regulation, mRNA degradation, and post-transcriptional modifications"
+"ARG5,6",YER069W,3.09,"Acetylglutamate kinase and N-acetyl-gamma-glutamyl-phosphate reductase; N-acetyl-L-glutamate kinase (NAGK) catalyzes the 2nd and N-acetyl-gamma-glutamyl-phosphate reductase (NAGSA), the 3rd step in arginine biosynthesis; synthesized as a precursor which is processed in the mitochondrion to yield mature NAGK and NAGSA; enzymes form a metabolon complex with Arg2p; NAGK C-terminal domain stabilizes the enzymes, slows catalysis and is involved in feed-back inhibition by arginine"
+ALD5,YER073W,3.17,"Mitochondrial aldehyde dehydrogenase, involved in regulation or biosynthesis of electron transport chain components and acetate formation; activated by K+; utilizes NADP+ as the preferred coenzyme; constitutively expressed"
+RTC2,YBR147W,3.25,"Protein of unknown function; mutant produces large lipid droplets, is resistant to fluconazole, has decreased levels of rDNA transcription, growth defects on minimal media, and suppresses cdc13-1; detected in highly purified mitochondria; similar to a G-protein coupled receptor from S, pombe"
+,YER078W-A,4.64,YER078W-A
+ILV1,YER086W,2.2,"Threonine deaminase, catalyzes the first step in isoleucine biosynthesis; expression is under general amino acid control; ILV1 locus exhibits highly positioned nucleosomes whose organization is independent of known ILV1 regulation"
+MET6,YER091C,4.11,"Cobalamin-independent methionine synthase, involved in methionine biosynthesis and regeneration; requires a minimum of two glutamates on the methyltetrahydrofolate substrate, similar to bacterial metE homologs"
+DSE1,YER124C,2.09,"Daughter cell-specific protein, may regulate cross-talk between the mating and filamentation pathways; deletion affects cell separation after division and sensitivity to alpha-factor and drugs affecting the cell wall"
+VFA1,YER128W,2.5,Protein that interacts with Vps4p and has a role in vacuolar sorting; localizes to endosomes in a Vps4-dependent manner; overexpression causes canavanine sensitivity and confers a partial class D vacuole morphology
+GRX4,YER174C,5.87,Hydroperoxide and superoxide-radical responsive glutathione-dependent oxidoreductase; monothiol glutaredoxin subfamily member along with Grx3p and Grx5p; protects cells from oxidative damage; mutant has increased aneuploidy tolerance; transcription is regulated by Yap5
+ECM32,YER176W,3.7,"DNA dependent ATPase/DNA helicase belonging to the Dna2p- and Nam7p-like family of helicases that is involved in modulating translation termination; interacts with the translation termination factors, localized to polysomes"
+,YER184C,2.09,YER184C
+GYP8,YFL027C,2.49,"GTPase-activating protein for yeast Rab family members; Ypt1p is the preferred in vitro substrate but also acts on Sec4p, Ypt31p and Ypt32p; involved in the regulation of ER to Golgi vesicle transport"
+CAF16,YFL028C,2.36,Part of evolutionarily-conserved CCR4-NOT regulatory complex; contains single ABC-type ATPase domain but no transmembrane domain; interacts with several subunits of Mediator
+,YFL041W-A,2.12,YFL041W-A
+FAB1,YFR019W,2.04,"1-phosphatidylinositol-3-phosphate 5-kinase; vacuolar membrane kinase that generates phosphatidylinositol (3,5)P2, which is involved in vacuolar sorting and homeostasis"
+HIS2,YFR025C,3.06,"Histidinolphosphatase, catalyzes the eighth step in histidine biosynthesis; mutations cause histidine auxotrophy and sensitivity to Cu, Co, and Ni salts; transcription is regulated by general amino acid control"
+CDC14,YFR028C,2.13,"Protein phosphatase required for mitotic exit; located in the nucleolus until liberated by the FEAR and Mitotic Exit Network in anaphase, enabling it to act on key substrates to effect a decrease in CDK/B-cyclin activity and mitotic exit; required for meiosis I spindle disassembly; released from nucleolus upon entry into anaphase I of meiosis, resequestered in metaphase II, then released again upon entry into anaphase II; maintained in nucleolus by Cdc55p in early meiosis"
+PTR3,YFR029W,3.62,"Component of the SPS plasma membrane amino acid sensor system (Ssy1p-Ptr3p-Ssy5p), which senses external amino acid concentration and transmits intracellular signals that result in regulation of expression of amino acid permease genes"
+MET10,YFR030W,11.38,"Subunit alpha of assimilatory sulfite reductase, which converts sulfite into sulfide"
+IRC5,YFR038W,2.03,Putative ATPase containing the DEAD/H helicase-related sequence motif; null mutant displays increased levels of spontaneous Rad52p foci
+CNN1,YFR046C,2.13,"Kinetochore protein of unknown function; associated with the essential kinetochore proteins Nnf1p and Spc24p; phosphorylated by both Clb5-Cdk1 and, to a lesser extent, Clb2-Cdk1,"
+LEU1,YGL009C,3.07,"Isopropylmalate isomerase, catalyzes the second step in the leucine biosynthesis pathway"
+ALK1,YGL021W,4.37,Protein kinase; accumulation and phosphorylation are periodic during the cell cycle; phosphorylated in response to DNA damage; contains characteristic motifs for degradation via the APC pathway; similar to Alk2p and to mammalian haspins
+AGA2,YGL032C,5.51,"Adhesion subunit of a-agglutinin of a-cells, C-terminal sequence acts as a ligand for alpha-agglutinin (Sag1p) during agglutination, modified with O-linked oligomannosyl chains, linked to anchorage subunit Aga1p via two disulfide bonds"
+DST1,YGL043W,2.03,"General transcription elongation factor TFIIS, enables RNA polymerase II to read through blocks to elongation by stimulating cleavage of nascent transcripts stalled at transcription arrest sites"
+SDS23,YGL056C,2.4,"One of two S, cerevisiae homologs (Sds23p and Sds24p) of the S, pombe Sds23 protein, which is implicated in APC/cyclosome regulation; involved in cell separation during budding"
+PKP2,YGL059W,4.26,Mitochondrial protein kinase that negatively regulates activity of the pyruvate dehydrogenase complex by phosphorylating the ser-133 residue of the Pda1p subunit; acts in concert with kinase Pkp1p and phosphatases Ptc5p and Ptc6p
+HNM1,YGL077C,2.34,Choline/ethanolamine transporter; involved in the uptake of nitrogen mustard and the uptake of glycine betaine during hypersaline stress; co-regulated with phospholipid biosynthetic genes and negatively regulated by choline and myo-inositol
+,YGL114W,2.29,YGL114W
+CDC20,YGL116W,4.39,"Cell-cycle regulated activator of anaphase-promoting complex/cyclosome (APC/C), which is required for metaphase/anaphase transition; directs ubiquitination of mitotic cyclins, Pds1p, and other anaphase inhibitors; potential Cdc28p substrate"
+,YGL117W,2.37,YGL117W
+MET13,YGL125W,14.25,"Major isozyme of methylenetetrahydrofolate reductase, catalyzes the reduction of 5,10-methylenetetrahydrofolate to 5-methyltetrahydrofolate in the methionine biosynthesis pathway"
+LYS5,YGL154C,2.37,Phosphopantetheinyl transferase involved in lysine biosynthesis; converts inactive apo-form of Lys2p (alpha-aminoadipate reductase) into catalytically active holo-form by posttranslational addition of phosphopantetheine
+ATG1,YGL180W,3.55,Protein ser/thr kinase required for vesicle formation in autophagy and the cytoplasm-to-vacuole targeting (Cvt) pathway; structurally required for phagophore assembly site formation; during autophagy forms a complex with Atg13p and Atg17p
+MND1,YGL183C,2.27,"Protein required for recombination and meiotic nuclear division; forms a complex with Hop2p, which is involved in chromosome pairing and repair of meiotic double-strand breaks"
+STR3,YGL184C,26.96,"Peroxisomal cystathionine beta-lyase, converts cystathionine into homocysteine; may be redox regulated by Gto1p"
+HOS2,YGL194C,2.49,"Histone deacetylase required for gene activation via specific deacetylation of lysines in H3 and H4 histone tails; subunit of the Set3 complex, a meiotic-specific repressor of sporulation specific genes that contains deacetylase activity"
+ARO8,YGL202W,2.19,"Aromatic aminotransferase I, expression is regulated by general control of amino acid biosynthesis"
+KIP3,YGL216W,2.45,Kinesin-related motor protein involved in mitotic spindle positioning
+IBA57,YJR122W,3.24,Mitochondrial matrix protein involved in the incorporation of iron-sulfur clusters into mitochondrial aconitase-type proteins; activates the radical-SAM family members Bio2p and Lip5p; interacts with Ccr4p in the two-hybrid system
+SIM1,YIL123W,3.23,"Protein of the SUN family (Sim1p, Uth1p, Nca3p, Sun4p) that may participate in DNA replication, promoter contains SCB regulation box at -300 bp indicating that expression may be cell cycle-regulated"
+SDT1,YGL224C,3.13,"Pyrimidine nucleotidase; overexpression suppresses the 6-AU sensitivity of transcription elongation factor S-II, as well as resistance to other pyrimidine derivatives"
+HAP2,YGL237C,2.04,"Subunit of the heme-activated, glucose-repressed Hap2p/3p/4p/5p CCAAT-binding complex, a transcriptional activator and global regulator of respiratory gene expression; contains sequences sufficient for both complex assembly and DNA binding"
+,YGR012W,2.08,YGR012W
+,YGR035C,8.17,YGR035C
+KSS1,YGR040W,2.31,Mitogen-activated protein kinase (MAPK) involved in signal transduction pathways that control filamentous growth and pheromone response; the KSS1 gene is nonfunctional in S288C strains and functional in W303 strains
+VHT1,YGR065C,6.27,High-affinity plasma membrane H+-biotin (vitamin H) symporter; mutation results in fatty acid auxotrophy; 12 transmembrane domain containing major facilitator subfamily member; mRNA levels negatively regulated by iron deprivation and biotin
+DBF2,YGR092W,4.24,Ser/Thr kinase involved in transcription and stress response; functions as part of a network of genes in exit from mitosis; localization is cell cycle regulated; activated by Cdc15p during the exit from mitosis; also plays a role in regulating the stability of SWI5 and CLB2 mRNAs
+CLD1,YGR110W,2.33,Mitochondrial cardiolipin-specific phospholipase; functions upstream of Taz1p to generate monolyso-cardiolipin; transcription increases upon genotoxic stress; involved in restricting Ty1 transposition; has homology to mammalian CGI-58
+DAM1,YGR113W,2.54,"Essential subunit of the Dam1 complex (aka DASH complex), couples kinetochores to the force produced by MT depolymerization thereby aiding in chromosome segregation; Ipl1p target for regulating kinetochore-MT attachments"
+,YGR125W,2.17,YGR125W
+CHO2,YGR157W,2.23,"Phosphatidylethanolamine methyltransferase (PEMT), catalyzes the first step in the conversion of phosphatidylethanolamine to phosphatidylcholine during the methylation pathway of phosphatidylcholine biosynthesis"
+GTR2,YGR163W,2.72,Putative GTP binding protein that negatively regulates Ran/Tc4 GTPase cycle; activates transcription; subunit of EGO and GSE complexes; required for sorting of Gap1p; localizes to cytoplasm and to chromatin; homolog of human RagC and RagD
+YPP1,YGR198W,2.04,Cargo-transport protein involved in endocytosis; interacts with phosphatidylinositol-4-kinase Stt4; GFP-fusion protein localizes to the cytoplasm; YGR198W is an essential gene
+NOP19,YGR251W,2.42,"Ribosome biogenesis factor; nucleolar protein associated with pre-rRNA components of the 90S preribosome, required for cleavage of pre-rRNA at A0, A1 and A2 sites; interacts with RNA helicase Dhr2p and RNA helicase-like protein Utp25p; required for incorporation of Utp25p into preribosomes"
+YOR1,YGR281W,2.66,"Plasma membrane ATP-binding cassette (ABC) transporter, multidrug transporter mediates export of many different organic anions including oligomycin; similar to human cystic fibrosis transmembrane receptor (CFTR)"
+OPI1,YHL020C,2.88,Transcriptional regulator of a variety of genes; phosphorylation by protein kinase A stimulates Opi1p function in negative regulation of phospholipid biosynthetic genes; involved in telomere maintenance
+SPO11,YHL022C,2.93,Meiosis-specific protein that initiates meiotic recombination by catalyzing the formation of double-strand breaks in DNA via a transesterification reaction; required for homologous chromosome pairing and synaptonemal complex formation
+FKS3,YMR306W,3.01,"Protein involved in spore wall assembly, has similarity to 1,3-beta-D-glucan synthase catalytic subunits Fks1p and Gsc2p; the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies"
+WSC4,YHL028W,5.52,ER membrane protein involved in the translocation of soluble secretory proteins and insertion of membrane proteins into the ER membrane; may also have a role in the stress response but has only partial functional overlap with WSC1-3
+MUP3,YHL036W,3.67,"Low affinity methionine permease, similar to Mup1p"
+CBP2,YHL038C,2.21,Required for splicing of the group I intron bI5 of the COB pre-mRNA; nuclear-encoded mitochondrial protein that binds to the RNA to promote splicing; also involved in but not essential for splicing of the COB bI2 intron and the intron in the 21S rRNA gene
+,YHL048C-A,6.51,YHL048C-A
+GPA1,YHR005C,2.16,GTP-binding alpha subunit of the heterotrimeric G protein that couples to pheromone receptors; negatively regulates the mating pathway by sequestering G(beta)gamma and by triggering an adaptive response; activates Vps34p at the endosome
+STP2,YHR006W,4.7,"Transcription factor, activated by proteolytic processing in response to signals from the SPS sensor system for external amino acids; activates transcription of amino acid permease genes"
+ARG4,YHR018C,2.41,"Argininosuccinate lyase, catalyzes the final step in the arginine biosynthesis pathway"
+MYO1,YHR023W,3.52,"Type II myosin heavy chain, required for wild-type cytokinesis and cell separation; localizes to the actomyosin ring; binds to myosin light chains Mlc1p and Mlc2p through its IQ1 and IQ2 motifs respectively"
+YHI9,YHR029C,3.79,"Protein of unknown function; null mutant is defective in unfolded protein response; possibly involved in a membrane regulation metabolic pathway; member of the PhzF superfamily, though most likely not involved in phenazine production"
+RRM3,YHR031C,2.74,DNA helicase involved in rDNA replication and Ty1 transposition; relieves replication fork pauses at telomeric regions; structurally and functionally related to Pif1p
+MED6,YHR058C,2.09,Subunit of the RNA polymerase II mediator complex; associates with core polymerase subunits to form the RNA polymerase II holoenzyme; essential for transcriptional regulation
+GIC1,YHR061C,3.48,"Protein of unknown function involved in initiation of budding and cellular polarization, interacts with Cdc42p via the Cdc42/Rac-interactive binding (CRIB) domain"
+PCL7,YIL050W,2.88,"Pho85p cyclin of the Pho80p subfamily, forms a functional kinase complex with Pho85p which phosphorylates Mmr1p and is regulated by Pho81p; involved in glycogen metabolism, expression is cell-cycle regulated"
+HTD2,YHR067W,5.01,"Mitochondrial 3-hydroxyacyl-thioester dehydratase involved in fatty acid biosynthesis, required for respiratory growth and for normal mitochondrial morphology"
+,YHR112C,3.17,YHR112C
+,YHR122W,4.46,YHR122W
+ARO9,YHR137W,3.09,"Aromatic aminotransferase II, catalyzes the first step of tryptophan, phenylalanine, and tyrosine catabolism"
+PEX28,YHR150W,2.31,"Peroxisomal integral membrane peroxin, involved in the regulation of peroxisomal size, number and distribution; genetic interactions suggest that Pex28p and Pex29p act at steps upstream of those mediated by Pex30p, Pex31p, and Pex32p"
+MTC6,YHR151C,2.4,Protein of unknown function; mtc6 is synthetically sick with cdc13-1
+CDC23,YHR166C,2.96,"Subunit of the Anaphase-Promoting Complex/Cyclosome (APC/C), which is a ubiquitin-protein ligase required for degradation of anaphase inhibitors, including mitotic cyclins, during the metaphase/anaphase transition"
+FMO1,YHR176W,3,"Flavin-containing monooxygenase, localized to the cytoplasmic face of the ER membrane; catalyzes oxidation of biological thiols to maintain the ER redox buffer ratio for correct folding of disulfide-bonded proteins"
+AIM46,YHR199C,2.39,"Putative protein of unknown function; the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies; null mutant displays elevated frequency of mitochondrial genome loss"
+NBL1,YHR199C-A,2.04,"Subunit of the conserved chromosomal passenger complex (CPC; Ipl1p-Sli15p-Bir1p-Nbl1p), which regulates mitotic chromosome segregation; not required for the kinase activity of the complex; mediates the interaction of Sli15p and Bir1p"
+SET5,YHR207C,2.2,"Methyltransferase involved in methylation of histone H4 Lys5, -8, -12; S-adenosylmethionine-dependent; zinc-finger protein, contains one canonical and two unusual fingers in unusual arrangements; deletion enhances replication of positive-strand RNA virus"
+BAT1,YHR208W,4.18,"Mitochondrial branched-chain amino acid (BCAA) aminotransferase, preferentially involved in BCAA biosynthesis; homolog of murine ECA39; highly expressed during logarithmic phase and repressed during stationary phase"
+CFD1,YIL003W,3.39,"Highly conserved, iron-sulfur cluster binding protein localized in the cytoplasm; forms a complex with Nbp35p that is involved in iron-sulfur protein assembly in the cytosol"
+EST3,YIL009C-A,2.91,"Component of the telomerase holoenzyme, involved in telomere replication"
+BAR1,YIL015W,3.24,"Aspartyl protease secreted into the periplasmic space of mating type a cells, helps cells find mating partners, cleaves and inactivates alpha factor allowing cells to recover from alpha-factor-induced cell cycle arrest"
+MNN4,YKL201C,2.87,"Putative positive regulator of mannosylphosphate transferase (Mnn6p), involved in mannosylphosphorylation of N-linked oligosaccharides; expression increases in late-logarithmic and stationary growth phases"
+MET30,YIL046W,3.72,"F-box protein containing five copies of the WD40 motif, controls cell cycle function, sulfur metabolism, and methionine biosynthesis as part of the ubiquitin ligase complex; interacts with and regulates Met4p, localizes within the nucleus"
+BAS1,YKR099W,2.83,Myb-related transcription factor involved in regulating basal and induced expression of genes of the purine and histidine biosynthesis pathways; also involved in regulation of meiotic recombination at specific genes
+MMF1,YIL051C,2.37,Mitochondrial protein required for transamination of isoleucine but not of valine or leucine; may regulate specificity of branched-chain transaminases Bat1p and Bat2p; interacts genetically with mitochondrial ribosomal protein genes
+SER33,YIL074C,3.52,"3-phosphoglycerate dehydrogenase, catalyzes the first step in serine and glycine biosynthesis; isozyme of Ser3p"
+AIR1,YIL079C,3,"Zinc knuckle protein, involved in nuclear RNA processing and degradation as a component of the TRAMP complex; stimulates the poly(A) polymerase activity of Pap2p in vitro; functionally redundant with Air2p"
+,YIL092W,3.18,YIL092W
+MOB1,YIL106W,2.63,Component of the mitotic exit network; associates with and is required for the activation and Cdc15p-dependent phosphorylation of the Dbf2p kinase; required for cytokinesis and cell separation; component of the CCR4 transcriptional complex
+QDR2,YIL121W,4.31,"Multidrug transporter of the major facilitator superfamily, required for resistance to quinidine, barban, cisplatin, and bleomycin; may have a role in potassium uptake"
+BUD16,YEL029C,2.76,"Putative pyridoxal kinase, a key enzyme involved in pyridoxal 5'-phosphate synthesis, the active form of vitamin B6; required for genome integrity; involved in bud-site selection; similarity to yeast BUD17 and human pyridoxal kinase (PDXK)"
+ATG32,YIL146C,2.15,"Mitochondrial outer membrane protein required to initiate mitophagy; recruits the autophagy adaptor protein Atg11p and the ubiquitin-like protein Atg8p to the mitochondrial surface to initiate mitophagy, the selective vacuolar degradation of mitochondria in response to starvation; can promote pexophagy when placed ectopically in the peroxisomal membrane"
+AIM20,YIL158W,2.71,Putative protein of unknown function; overexpression causes a cell cycle delay or arrest; green fluorescent protein (GFP)-fusion protein localizes to the vacuole; null mutant displays elevated frequency of mitochondrial genome loss
+NIT1,YIL164C,11.71,"Nitrilase, member of the nitrilase branch of the nitrilase superfamily; in closely related species and other S, cerevisiae strain backgrounds YIL164C and adjacent ORF, YIL165C, likely constitute a single ORF encoding a nitrilase gene"
+YAP5,YIR018W,4.98,Basic leucine zipper (bZIP) iron-sensing transcription factor
+LYS1,YIR034C,4.14,"Saccharopine dehydrogenase (NAD+, L-lysine-forming), catalyzes the conversion of saccharopine to L-lysine, which is the final step in the lysine biosynthesis pathway; also has mRNA binding activity"
+UBX6,YJL048C,2.69,"UBX (ubiquitin regulatory X) domain-containing protein that interacts with Cdc48p, transcription is repressed when cells are grown in media containing inositol and choline"
+IRC8,YJL051W,3.58,"Bud tip localized protein of unknown function; mRNA is targeted to the bud by a She2p dependent transport system; mRNA is cell cycle regulated via Fkh2p, peaking in G2/M phase; null mutant displays increased levels of spontaneous Rad52p foc"
+KIP2,YPL155C,2.69,"Kinesin-related motor protein involved in mitotic spindle positioning, stabilizes microtubules by targeting Bik1p to the plus end; Kip2p levels are controlled during the cell cycle"
+BNA3,YJL060W,5.23,"Kynurenine aminotransferase, catalyzes formation of kynurenic acid from kynurenine; potential Cdc28p substrate"
+ARG2,YJL071W,4.68,"Acetylglutamate synthase (glutamate N-acetyltransferase), mitochondrial enzyme that catalyzes the first step in the biosynthesis of the arginine precursor ornithine; forms a complex with Arg5,6p"
+PSF2,YJL072C,3.63,"Subunit of the GINS complex (Sld5p, Psf1p, Psf2p, Psf3p), which is localized to DNA replication origins and implicated in assembly of the DNA replication machinery"
+,YJL077W-B,2.54,YJL077W-B
+BDS1,YOL164W,2.67,Bacterially-derived sulfatase required for use of alkyl- and aryl-sulfates as sulfur sources
+SRS2,YJL092W,2.18,"DNA helicase and DNA-dependent ATPase involved in DNA repair and checkpoint recovery, needed for proper timing of commitment to meiotic recombination and transition from Meiosis I to II; blocks trinucleotide repeat expansion; affects genome stability"
+GZF3,YJL110C,2.55,GATA zinc finger protein and Dal80p homolog that negatively regulates nitrogen catabolic gene expression by competing with Gat1p for GATA site binding; function requires a repressive carbon source; dimerizes with Dal80p and binds to Tor1p
+GLG2,YJL137C,2.24,"Self-glucosylating initiator of glycogen synthesis, also glucosylates n-dodecyl-beta-D-maltoside; similar to mammalian glycogenin"
+INO1,YJL153C,2.92,"Inositol-3-phosphate synthase, involved in synthesis of inositol phosphates and inositol-containing phospholipids; transcription is coregulated with other phospholipid biosynthetic genes by Ino2p and Ino4p, which bind the UASINO DNA element"
+FAR1,YJL157C,4.42,"Cyclin-dependent kinase inhibitor that mediates cell cycle arrest in response to pheromone; also forms a complex with Cdc24p, Ste4p, and Ste18p that may specify the direction of polarized growth during mating; potential Cdc28p substrate"
+ASG7,YJL170C,4.85,Protein that regulates signaling from a G protein beta subunit Ste4p and its relocalization within the cell; specific to a-cells and induced by alpha-factor
+ACO2,YJL200C,2.73,"Putative mitochondrial aconitase isozyme; similarity to Aco1p, an aconitase required for the TCA cycle; expression induced during growth on glucose, by amino acid starvation via Gcn4p, and repressed on ethanol"
+ECM25,YJL201W,2.33,Non-essential protein of unknown function; promoter contains a consensus binding sequence for factor Abf1p
+PEX2,YJL210W,3.04,"RING-finger peroxin and E3 ubiquitin ligase, peroxisomal membrane protein with a C-terminal zinc-binding RING domain, forms translocation subcomplex with Pex10p and Pex12p which functions in peroxisomal matrix protein import"
+OPT1,YJL212C,3.46,Proton-coupled oligopeptide transporter of the plasma membrane; also transports glutathione and phytochelatin; member of the OPT family
+SAG1,YJR004C,2.71,"Alpha-agglutinin of alpha-cells, binds to Aga1p during agglutination, N-terminal half is homologous to the immunoglobulin superfamily and contains binding site for a-agglutinin, C-terminal half is highly glycosylated and contains GPI anchor"
+MHO1,YJR008W,2.88,"Protein of unknown function; inhibits haploid invasive growth when overexpressed; synthetically lethal with phospholipase C (PLC1); expression induced by mild heat-stress on a non-fermentable carbon source, upon entry into stationary phase and upon nitrogen deprivation; repressed by inosine and choline in an Opi1p-dependent manner; highly conserved from bacteria to human; Memo, the human homolog, is an ErbB2 interacting protein with an essential function in cell motility"
+MET3,YJR010W,12.13,"ATP sulfurylase, catalyzes the primary step of intracellular sulfate activation, essential for assimilatory reduction of sulfate to sulfide, involved in methionine metabolism"
+ILV3,YJR016C,2.36,"Dihydroxyacid dehydratase, catalyzes third step in the common pathway leading to biosynthesis of branched-chain amino acids"
+TES1,YJR019C,2.79,Peroxisomal acyl-CoA thioesterase likely to be involved in fatty acid oxidation rather than fatty acid synthesis; conserved protein also found in human peroxisomes; TES1 mRNA levels increase during growth on fatty acids
+RAD26,YJR035W,2.01,Protein involved in transcription-coupled nucleotide excision repair of UV-induced DNA lesions; recruitment to DNA lesions is dependent on an elongating RNA polymerase II; homolog of human CSB protein
+TAH11,YJR046W,3.05,"DNA replication licensing factor, required for pre-replication complex assembly"
+OPI3,YJR073C,2.83,"Phospholipid methyltransferase (methylene-fatty-acyl-phospholipid synthase), catalyzes the last two steps in phosphatidylcholine biosynthesis"
+PAN5,YHR063C,2.66,"2-dehydropantoate 2-reductase, part of the pantothenic acid pathway, structurally homologous to E, coli panE"
+BUD4,YJR092W,3.08,"Anillin-like protein involved in bud-site selection; required for the axial budding pattern; localizes with septins to the bud neck in mitosis and may constitute an axial landmark for the next round of budding; required for the formation and disassembly of the double septin ring structure, and generally for septin organization; in vivo substrate of Cdc28p/Clb2p"
+NNF1,YJR112W,4.89,Essential component of the MIND kinetochore complex (Mtw1p Including Nnf1p-Nsl1p-Dsn1p) which joins kinetochore subunits contacting DNA to those contacting microtubules; required for accurate chromosome segregation
+JHD2,YJR119C,2.1,JmjC domain family histone demethylase specific for H3-K4 (histone H3 Lys4); removes methyl groups specifically added by Set1p methyltransferase; protein levels regulated by Not4p (E3 ubiquitin ligase) polyubiquitin-mediated degradation
+SNA4,YDL123W,2.65,"Protein of unknown function, localized to the vacuolar outer membrane; predicted to be palmitoylated"
+STR2,YJR130C,2.85,"Cystathionine gamma-synthase, converts cysteine into cystathionine"
+MET5,YJR137C,11.52,"Sulfite reductase beta subunit, involved in amino acid biosynthesis, transcription repressed by methionine"
+IML1,YJR138W,3.14,Subunit of both the SEA (Seh1-associated) and Iml1p complexes; SEA complex is a coatomer-related complex that associates dynamically with the vacuole; Iml1p complex (Iml1p-Npr2p-Npr3p) is required for non-nitrogen-starvation (NNS)-induced autophagy; localized to either pre-autophagosomal structures (PAS) or non-PAS structures during NNS-induced autophagy; has an N-terminal CDC48-like domain (RANS) required for NNS-induced autophagy and a C-terminal DEP domain
+,YJR149W,2.39,YJR149W
+MET14,YKL001C,3.44,"Adenylylsulfate kinase, required for sulfate assimilation and involved in methionine metabolism"
+PUT3,YKL015W,2,"Transcriptional activator of proline utilization genes, constitutively binds PUT1 and PUT2 promoter sequences as a dimer and undergoes a conformational change to form the active state; differentially phosphorylated in the presence of different nitrogen sources; has a Zn(2)-Cys(6) binuclear cluster domain"
+CDC16,YKL022C,2.05,"Subunit of the anaphase-promoting complex/cyclosome (APC/C), which is a ubiquitin-protein ligase required for degradation of anaphase inhibitors, including mitotic cyclins, during the metaphase/anaphase transition; required for sporulation"
+,YKL023W,2.2,YKL023W
+MAE1,YKL029C,3.13,"Mitochondrial malic enzyme, catalyzes the oxidative decarboxylation of malate to pyruvate, which is a key intermediate in sugar metabolism and a precursor for synthesis of several amino acids"
+OAR1,YKL055C,2.19,"Mitochondrial 3-oxoacyl-[acyl-carrier-protein] reductase, may comprise a type II mitochondrial fatty acid synthase along with Mct1p"
+STB6,YKL072W,3.01,Protein that binds Sin3p in a two-hybrid assay
+HOT13,YKL084W,2.18,"Zinc-binding mitochondrial intermembrane space (IMS) protein involved in a disulfide relay system for IMS import of cysteine-containing proteins; binds Mia40p and stimulates its Erv1p-dependent oxidation, probably by sequestering zinc"
+MIF2,YKL089W,3.2,"Kinetochore protein with homology to human CENP-C, required for structural integrity of the spindle during anaphase spindle elongation, interacts with histones H2A, H2B, and H4, phosphorylated by Ipl1p"
+AAT1,YKL106W,2.56,"Mitochondrial aspartate aminotransferase, catalyzes the conversion of oxaloacetate to aspartate in aspartate and asparagine biosynthesis"
+OAC1,YKL120W,6.24,"Mitochondrial inner membrane transporter, transports oxaloacetate, sulfate, thiosulfate, and isopropylmalate; member of the mitochondrial carrier family"
+ASH1,YKL185W,2.4,"Zinc-finger inhibitor of HO transcription; mRNA is localized and translated in the distal tip of anaphase cells, resulting in accumulation of Ash1p in daughter cell nuclei and inhibition of HO expression; potential Cdc28p substrate"
+PHO5,YBR093C,2.59,Repressible acid phosphatase (1 of 3) that also mediates extracellular nucleotide-derived phosphate hydrolysis; secretory pathway derived cell surface glycoprotein; induced by phosphate starvation and coordinately regulated by PHO4 and PHO2
+TRP3,YKL211C,2.74,"Bifunctional enzyme exhibiting both indole-3-glycerol-phosphate synthase and anthranilate synthase activities, forms multifunctional hetero-oligomeric anthranilate synthase:indole-3-glycerol phosphate synthase enzyme complex with Trp2p"
+SRY1,YKL218C,2.15,"3-hydroxyaspartate dehydratase, deaminates L-threo-3-hydroxyaspartate to form oxaloacetate and ammonia; required in the presence of hydroxyaspartate; highly similar to mouse serine racemase (Srr) but has no serine racemase activity"
+ECM9,YKR004C,2.75,Non-essential protein of unknown function
+TOF2,YKR010C,2.07,Protein required for rDNA silencing and mitotic rDNA condensation; stimulates Cdc14p phosphatase activity and biphasic release to promote rDNA repeat segregation; required for condensin recruitment to the replication fork barrier site
+PRY2,YKR013W,3.23,Protein of unknown function
+,YKR015C,2.3,YKR015C
+ALY1,YKR021W,2.07,Alpha arrestin that controls nutrient-mediated intracellular sorting of permease Gap1p; interacts with AP-1 subunit Apl4p; may regulate endocytosis of plasma membrane proteins by recruiting ubiquitin ligase Rsp5p to plasma membrane targets
+CAF4,YKR036C,2.01,"WD40 repeat-containing protein associated with the CCR4-NOT complex, interacts in a Ccr4p-dependent manner with Ssn2p; also interacts with Fis1p, Mdv1p and Dnm1p and plays a role in mitochondrial fission"
+GAP1,YKR039W,4.1,General amino acid permease; Gap1p senses the presence of amino acid substrates to regulate localization to the plasma membrane when needed
+PET10,YKR046C,2.09,Protein of unknown function that co-purifies with lipid particles; expression pattern suggests a role in respiratory growth; computational analysis of large-scale protein-protein interaction data suggests a role in ATP/ADP exchange
+DYN1,YKR054C,2.08,"Cytoplasmic heavy chain dynein, microtubule motor protein, required for anaphase spindle elongation; involved in spindle assembly, chromosome movement, and spindle orientation during cell division, targeted to microtubule tips by Pac1p"
+OAF3,YKR064W,2.43,"Putative transcriptional repressor with Zn(2)-Cys(6) finger; negatively regulates transcription in response to oleate levels, based on mutant phenotype and localization to oleate-responsive promoters; the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies"
+MET1,YKR069W,16.09,"S-adenosyl-L-methionine uroporphyrinogen III transmethylase, involved in the biosynthesis of siroheme, a prosthetic group used by sulfite reductase; required for sulfate assimilation and methionine biosynthesis"
+DRE2,YKR071C,3.75,Conserved component of an early step in the cytosolic Fe-S protein assembly (CIA) machinery; contains an Fe-S cluster that receives electrons from NADPH via the action of Tah18p; ortholog of human Ciapin1
+,YKR096W,2.54,YKR096W
+SWD3,YBR175W,2.58,"Essential subunit of the COMPASS (Set1C) complex, which methylates histone H3 on lysine 4 and is required in transcriptional silencing near telomeres; WD40 beta propeller superfamily member and ortholog of mammalian WDR5"
+SIR1,YKR101W,3.02,"Protein involved in repression of transcription at the silent mating-type loci HML and HMR; recruitment to silent chromatin requires interactions with Orc1p and with Sir4p, through a common Sir1p domain; binds to centromeric chromatin"
+PAU17,YLL025W,2.34,"Protein of unknown function, member of the seripauperin multigene family encoded mainly in subtelomeric regions; YLL025W is not an essential gene"
+ISA1,YLL027W,2.73,Protein required for maturation of mitochondrial [4Fe-4S] proteins; functions in a complex with Isa2p and possibly Iba57p; isa1 deletion causes loss of mitochondrial DNA and respiratory deficiency; depletion reduces growth on nonfermentable carbon sources; functional ortholog of bacterial A-type ISC proteins
+GRC3,YLL035W,2.32,Polynucleotide kinase present on rDNA that is required for efficient transcription termination by RNA polymerase I; required for cell growth; mRNA is cell-cycle regulated
+AQY2,YLL052C,3.01,"Water channel that mediates the transport of water across cell membranes, only expressed in proliferating cells, controlled by osmotic signals, may be involved in freeze tolerance; disrupted by a stop codon in many S, cerevisiae strains"
+,YLL053C,3.22,YLL053C
+YCT1,YLL055W,5.23,High-affinity cysteine-specific transporter with similarity to the Dal5p family of transporters; green fluorescent protein (GFP)-fusion protein localizes to the endoplasmic reticulum; YCT1 is not an essential gene
+,YLL056C,3.89,YLL056C
+,YLL058W,3.35,YLL058W
+GTT2,YLL060C,2.49,"Glutathione S-transferase capable of homodimerization; functional overlap with Gtt2p, Grx1p, and Grx2p"
+MMP1,YLL061W,5.9,"High-affinity S-methylmethionine permease, required for utilization of S-methylmethionine as a sulfur source; has similarity to S-adenosylmethionine permease Sam3p"
+MHT1,YLL062C,2.92,"S-methylmethionine-homocysteine methyltransferase, functions along with Sam4p in the conversion of S-adenosylmethionine (AdoMet) to methionine to control the methionine/AdoMet ratio"
+,YLL066W-B,2.49,YLL066W-B
+,YLL066W-B,2.18,YLL066W-B
+LOT6,YLR011W,2.2,"FMN-dependent NAD(P)H:quinone reductase, may be involved in quinone detoxification; expression elevated at low temperature; sequesters the Cin5p transcription factor in the cytoplasm in complex with the proteasome under reducing conditions"
+AAT2,YLR027C,2.01,"Cytosolic aspartate aminotransferase, involved in nitrogen metabolism; localizes to peroxisomes in oleate-grown cells"
+,YLR042C,2.39,YLR042C
+STU2,YLR045C,2.19,Microtubule-associated protein (MAP) of the XMAP215/Dis1 family; regulates microtubule dynamics during spindle orientation and metaphase chromosome alignment; interacts with spindle pole body component Spc72p
+,YLR053C,3.26,YLR053C
+,YLR063W,2.76,YLR063W
+RAX2,YLR084C,2.86,N-glycosylated protein involved in the maintenance of bud site selection during bipolar budding; localization requires Rax1p; RAX2 mRNA stability is regulated by Mpt5p
+SMC4,YLR086W,2.02,Subunit of the condensin complex; reorganizes chromosomes during cell division; forms a complex with Smc2p that has ATP-hydrolyzing and DNA-binding activity; required for tRNA gene clustering at the nucleolus; potential Cdc28p substrate
+ALT1,YLR089C,3.32,"Alanine transaminase (glutamic pyruvic transaminase); involved in alanine biosynthetic and catabolic processes; the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies"
+XDJ1,YLR090W,2.32,"Putative chaperone, homolog of E, coli DnaJ, closely related to Ydj1p; the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies"
+SUL2,YLR092W,20.67,"High affinity sulfate permease; sulfate uptake is mediated by specific sulfate transporters Sul1p and Sul2p, which control the concentration of endogenous activated sulfate intermediates"
+ICT1,YLR099C,2.68,"Lysophosphatidic acid acyltransferase, responsible for enhanced phospholipid synthesis during organic solvent stress; null displays increased sensitivity to Calcofluor white; highly expressed during organic solvent stress"
+ZRT2,YLR130C,2.13,Low-affinity zinc transporter of the plasma membrane; transcription is induced under low-zinc conditions by the Zap1p transcription factor
+ACE2,YLR131C,3.68,"Transcription factor required for septum destruction after cytokinesis; phosphorylation by Cbk1p blocks nuclear exit of Ace2p during the M-to-G1 transition, causing its specific localization to daughter cell nuclei, and also increases Ace2p activity; phosphorylation by Cdc28p and Pho85p prevents nuclear import during cell cycle phases other than cytokinesis; part of the RAM network that regulates cellular polarity and morphogenesis"
+USB1,YLR132C,3.16,Essential protein that localizes to the nucleus and mitochondria; overexpression suppresses the respiratory defects of oxa1 and mtf2 mutants
+CKI1,YLR133W,2.87,"Choline kinase, catalyzing the first step in phosphatidylcholine synthesis via the CDP-choline (Kennedy pathway); exhibits some ethanolamine kinase activity contributing to phosphatidylethanolamine synthesis via the CDP-ethanolamine pathway"
+PUT1,YLR142W,3.77,"Proline oxidase, nuclear-encoded mitochondrial protein involved in utilization of proline as sole nitrogen source; PUT1 transcription is induced by Put3p in the presence of proline and the absence of a preferred nitrogen source"
+,YLR156W,3.5,YLR156W
+,YLR157W-C,3.01,YLR157W-C
+SHH4,YLR164W,4.89,"Mitochondrial inner membrane protein of unknown function; similar to Tim18p and Sdh4p; a fraction copurifies with Sdh3p, but Shh4p is neither a stoichiometric subunit of succinate dehydrogenase nor of the TIM22 translocase; expression induced by nitrogen limitation in a GLN3, GAT1-dependent manner"
+UPS2,YLR168C,2.53,"Mitochondrial protein involved in phospholipid metabolism; localizes to the intermembrane space; has a role in regulation of phospholipid metabolism by inhibiting conversion of phosphatidylethanolamine to phosphatidylcholine; null mutant has defects in mitochondrial morphology; similar to Ups1p, Ups3p and to human PRELI"
+,YLR179C,2.92,YLR179C
+SAM1,YLR180W,4.23,"S-adenosylmethionine synthetase, catalyzes transfer of the adenosyl group of ATP to the sulfur atom of methionine; one of two differentially regulated isozymes (Sam1p and Sam2p)"
+ATG26,YLR189C,2.05,"UDP-glucose:sterol glucosyltransferase, conserved enzyme involved in synthesis of sterol glucoside membrane lipids; in contrast to ATG26 from P, pastoris, S, cerevisiae ATG26 is not involved in autophagy"
+PEX13,YLR191W,2.23,"Integral peroxisomal membrane protein required for translocation of peroxisomal matrix proteins, interacts with the PTS1 signal recognition factor Pex5p and the PTS2 signal recognition factor Pex7p, forms a complex with Pex14p and Pex17p"
+CLB4,YLR210W,2.34,"B-type cyclin involved in cell cycle progression; activates Cdc28p to promote the G2/M transition; may be involved in DNA replication and spindle assembly; accumulates during S phase and G2, then targeted for ubiquitin-mediated degradation"
+TUB4,YLR212C,2.36,"Gamma-tubulin, involved in nucleating microtubules from both the cytoplasmic and nuclear faces of the spindle pole body"
+VPS34,YLR240W,2.07,Phosphatidylinositol 3-kinase responsible for the synthesis of phosphatidylinositol 3-phosphate; forms membrane-associated signal transduction complex with Vps15p to regulate protein sorting; activated by the GTP-bound form of Gpa1p
+,YLR307C-A,17.17,YLR307C-A
+,YLR346C,2.66,YLR346C
+DIC1,YLR348C,6.83,"Mitochondrial dicarboxylate carrier, integral membrane protein, catalyzes a dicarboxylate-phosphate exchange across the inner mitochondrial membrane, transports cytoplasmic dicarboxylates into the mitochondrial matrix"
+BUD8,YLR353W,2.27,"Protein involved in bud-site selection; diploid mutants display a unipolar budding pattern instead of the wild-type bipolar pattern, and bud at the proximal pole"
+ILV5,YLR355C,2.07,Bifunctional acetohydroxyacid reductoisomerase and mtDNA binding protein; involved in branched-chain amino acid biosynthesis and maintenance of wild-type mitochondrial DNA; found in mitochondrial nucleoids
+ATG33,YLR356W,2.49,"Mitochondrial mitophagy-specific protein; required primarily for mitophagy induced at the post-log phase; not required for other types of selective autophagy or macroautophagy; conserved within fungi, but not in higher eukaryotes"
+RSC2,YLR357W,2.3,Component of the RSC chromatin remodeling complex; required for expression of mid-late sporulation-specific genes; involved in telomere maintenance
+NMD4,YLR363C,2.29,"Protein interacting with Nam7p, may be involved in the nonsense-mediated mRNA decay pathway"
+GRX8,YLR364W,3.78,Glutaredoxin that employs a dithiol mechanism of catalysis; monomeric; activity is low and null mutation does not affect sensitivity to oxidative stress; GFP-fusion protein localizes to the cytoplasm; expression strongly induced by arsenic
+REH1,YLR387C,2.53,"Cytoplasmic 60S subunit biogenesis factor, associates with pre-60S particles; similar to Rei1p and shares partially redundant function in cytoplasmic 60S subunit maturation; contains dispersed C2H2 zinc finger domains"
+DIF1,YLR437C,2.05,"Protein that regulates the nuclear localization of ribonucleotide reductase Rnr2p and Rnr4p subunits; phosphorylated by Dun1p in response to DNA damage and degraded; N-terminal half has similarity to S, pombe Spd1 protein"
+LEU3,YLR451W,2.33,"Zinc-knuckle transcription factor, repressor and activator; regulates genes involved in branched chain amino acid biosynthesis and ammonia assimilation; acts as a repressor in leucine-replete conditions and as an activator in the presence of alpha-isopropylmalate, an intermediate in leucine biosynthesis that accumulates during leucine starvation"
+SST2,YLR452C,3.35,"GTPase-activating protein for Gpa1p, regulates desensitization to alpha factor pheromone; also required to prevent receptor-independent signaling of the mating pathway; member of the RGS (regulator of G-protein signaling) family"
+,YLR466C-B,2.21,YLR466C-B
+,YLR466C-B,2.33,YLR466C-B
+TRM12,YML005W,2.03,S-adenosylmethionine-dependent methyltransferase of the seven beta-strand family; required for wybutosine formation in phenylalanine-accepting tRNA
+YOX1,YML027W,3.19,"Homeodomain-containing transcriptional repressor, binds to Mcm1p and to early cell cycle boxes (ECBs) in the promoters of cell cycle-regulated genes expressed in M/G1 phase; expression is cell cycle-regulated; potential Cdc28p substrate"
+,YML037C,2.32,YML037C
+SUR7,YML052W,2.75,"Plasma membrane protein that localizes to furrow-like invaginations (MCC patches); component of eisosomes; associated with endocytosis, along with Pil1p and Lsp1p; sporulation and plasma membrane sphingolipid content are altered in mutants"
+WAR1,YML076C,3.22,"Homodimeric Zn2Cys6 zinc finger transcription factor; binds to a weak acid response element to induce transcription of PDR12 and FUN34, encoding an acid transporter and a putative ammonia transporter, respectively"
+CPA1,YOR303W,2.5,"Small subunit of carbamoyl phosphate synthetase, which catalyzes a step in the synthesis of citrulline, an arginine precursor; translationally regulated by an attenuator peptide encoded by YOR302W within the CPA1 mRNA 5'-leader"
+VPS9,YML097C,2.47,A guanine nucleotide exchange factor involved in vesicle-mediated vacuolar protein transport; specifically stimulates the intrinsic guanine nucleotide exchange activity of Vps21p/Rab5: similar to mammalian ras inhibitors; binds ubiquitin
+TAF8,YML114C,2.04,"TFIID subunit (65 kDa), involved in RNA polymerase II transcription initiation"
+CDC5,YMR001C,3.53,"Polo-like kinase with multiple functions in mitosis and cytokinesis through substrate phosphorylation, also functions in adaptation to DNA damage during meiosis; has similarity to Xenopus Plx1 and S, pombe Plo1p; possible Cdc28p substrate"
+,YMR001C-A,5.45,YMR001C-A
+AIM34,YMR003W,2.05,Protein of unknown function; GFP-fusion protein localizes to the mitochondria; null mutant is viable and displays reduced frequency of mitochondrial genome loss
+,YMR018W,2.09,YMR018W
+STB4,YMR019W,2.99,Putative transcription factor; contains a Zn(II)2Cys6 zinc finger domain characteristic of DNA-binding proteins; computational analysis suggests a role in regulation of expression of genes encoding transporters; binds Sin3p in a two-hybrid assay;
+,YMR030W-A,3.43,YMR030W-A
+HOF1,YMR032W,3.56,"Bud neck-localized, SH3 domain-containing protein required for cytokinesis; regulates actomyosin ring dynamics and septin localization; interacts with the formins, Bni1p and Bnr1p, and with Cyk3p, Vrp1p, and Bni5p"
+ARG80,YMR042W,2.95,Transcription factor involved in regulation of arginine-responsive genes; acts with Arg81p and Arg82p
+AAC1,YMR056C,2.38,"Mitochondrial inner membrane ADP/ATP translocator, exchanges cytosolic ADP for mitochondrially synthesized ATP; phosphorylated; Aac1p is a minor isoform while Pet9p is the major ADP/ATP translocator"
+ARG7,YMR062C,2.67,"Mitochondrial ornithine acetyltransferase, catalyzes the fifth step in arginine biosynthesis; also possesses acetylglutamate synthase activity, regenerates acetylglutamate while forming ornithine"
+AEP1,YMR064W,2.35,Protein required for expression of the mitochondrial OLI1 gene encoding subunit 9 of F1-F0 ATP synthase
+KAR5,YMR065W,2.8,"Protein required for nuclear membrane fusion during karyogamy, localizes to the membrane with a soluble portion in the endoplasmic reticulum lumen, may form a complex with Jem1p and Kar2p; expression of the gene is regulated by pheromone"
+ILV2,YMR108W,2.72,"Acetolactate synthase, catalyses the first common step in isoleucine and valine biosynthesis and is the target of several classes of inhibitors, localizes to the mitochondria; expression of the gene is under general amino acid control"
+,YMR144W,2.53,YMR144W
+EAR1,YMR171C,2.03,Specificity factor required for Rsp5p-dependent ubiquitination and sorting of specific cargo proteins at the multivesicular body; mRNA is targeted to the bud via the mRNA transport system involving She2p
+ECM5,YMR176W,2.01,"Non-essential protein of unknown function, contains ATP/GTP-binding site motif A; null mutant exhibits cellular volume up to four times greater than wild-type, also large drooping buds with elongated necks"
+,YMR185W,2.28,YMR185W
+,YMR187C,2.22,YMR187C
+CIK1,YMR198W,2.49,"Kinesin-associated protein required for both karyogamy and mitotic spindle organization, interacts stably and specifically with Kar3p and may function to target this kinesin to a specific cellular role; has similarity to Vik1p"
+RAD14,YMR201C,2.9,Protein that recognizes and binds damaged DNA during nucleotide excision repair; subunit of Nucleotide Excision Repair Factor 1 (NEF1); contains zinc finger motif; homolog of human XPA protein
+DML1,YMR211W,3.17,"Essential protein involved in mtDNA inheritance, may also function in the partitioning of the mitochondrial organelle or in the segregation of chromosomes, exhibits regions similar to members of a GTPase family"
+ERG8,YMR220W,2.45,"Phosphomevalonate kinase, an essential cytosolic enzyme that acts in the biosynthesis of isoprenoids and sterols, including ergosterol, from mevalonate"
+TAF9,YMR236W,2.07,"Subunit (17 kDa) of TFIID and SAGA complexes, involved in RNA polymerase II transcription initiation and in chromatin modification, similar to histone H3"
+,YMR265C,2.49,YMR265C
+URA10,YMR271C,4.23,"Minor orotate phosphoribosyltransferase (OPRTase) isozyme that catalyzes the fifth enzymatic step in the de novo biosynthesis of pyrimidines, converting orotate into orotidine-5'-phosphate; major OPRTase encoded by URA5"
+DSS1,YMR287C,2.6,"3'-5' exoribonuclease, component of the mitochondrial degradosome along with the ATP-dependent RNA helicase Suv3p; the degradosome associates with the ribosome and mediates turnover of aberrant or unprocessed RNAs"
+HSH155,YMR288W,2.1,U2-snRNP associated splicing factor that forms extensive associations with the branch site-3' splice site-3' exon region upon prespliceosome formation; similarity to the mammalian U2 snRNP-associated splicing factor SAP155
+ATM1,YMR301C,2.18,"Mitochondrial inner membrane ATP-binding cassette (ABC) transporter, exports mitochondrially synthesized precursors of iron-sulfur (Fe/S) clusters to the cytosol"
+HIS7,YBR248C,2.46,"Imidazole glycerol phosphate synthase (glutamine amidotransferase:cyclase), catalyzes the fifth step of histidine biosynthesis and also produces 5-aminoimidazole-4-carboxamide ribotide (AICAR), a purine precursor"
+HRB1,YNL004W,2.55,"Poly(A+) RNA-binding protein, involved in the export of mRNAs from the nucleus to the cytoplasm; similar to Gbp2p and Npl3p"
+HEF3,YNL014W,2.04,Translational elongation factor EF-3; paralog of YEF3 and member of the ABC superfamily; stimulates EF-1 alpha-dependent binding of aminoacyl-tRNA by the ribosome; normally expressed in zinc deficient cells
+,YNL046W,3.7,YNL046W
+MSG5,YNL053W,2.15,"Dual-specificity protein phosphatase; exists in 2 isoforms; required for maintenance of a low level of signaling through the cell integrity pathway, adaptive response to pheromone; regulates and is regulated by Slt2p; dephosphorylates Fus3p"
+,YNL058C,2.98,YNL058C
+NIS1,YNL078W,2.98,Protein localized in the bud neck at G2/M phase; physically interacts with septins; possibly involved in a mitotic signaling network
+AVT4,YNL101W,2.43,"Vacuolar transporter, exports large neutral amino acids from the vacuole; member of a family of seven S, cerevisiae genes (AVT1-7) related to vesicular GABA-glycine transporters"
+MET4,YNL103W,2.12,"Leucine-zipper transcriptional activator, responsible for the regulation of the sulfur amino acid pathway, requires different combinations of the auxiliary factors Cbf1p, Met28p, Met31p and Met32p"
+LEU4,YNL104C,2.5,Alpha-isopropylmalate synthase (2-isopropylmalate synthase); the main isozyme responsible for the first step in the leucine biosynthesis pathway
+COG1,YGL223C,2.38,"Essential component of the conserved oligomeric Golgi complex (Cog1p through Cog8p), a cytosolic tethering complex that functions in protein trafficking to mediate fusion of transport vesicles to Golgi compartments"
+NAF1,YNL124W,4.58,"RNA-binding protein required for the assembly of box H/ACA snoRNPs and thus for pre-rRNA processing, forms a complex with Shq1p and interacts with H/ACA snoRNP components Nhp2p and Cbf5p; similar to Gar1p"
+ESBP6,YNL125C,2.66,"Protein with similarity to monocarboxylate permeases, appears not to be involved in transport of monocarboxylates such as lactate, pyruvate or acetate across the plasma membrane"
+SPC98,YNL126W,3.28,Component of the microtubule-nucleating Tub4p (gamma-tubulin) complex; interacts with Spc110p at the spindle pole body (SPB) inner plaque and with Spc72p at the SPB outer plaque
+CPT1,YNL130C,2.05,"Cholinephosphotransferase, required for phosphatidylcholine biosynthesis and for inositol-dependent regulation of EPT1 transcription"
+DGR1,YNL130C-A,3.21,Protein of unknown function; dgr1 null mutant is resistant to 2-deoxy-D-glucose
+,YNL146C-A,2.07,YNL146C-A
+PSD1,YNL169C,4.8,"Phosphatidylserine decarboxylase of the mitochondrial inner membrane, converts phosphatidylserine to phosphatidylethanolamine"
+APC1,YNL172W,2.45,"Largest subunit of the Anaphase-Promoting Complex/Cyclosome (APC/C), which is a ubiquitin-protein ligase required for degradation of anaphase inhibitors, including mitotic cyclins, during the metaphase/anaphase transition; component of the platform domain of the APC/C, based on structural analysis"
+TDA7,YNL176C,2.11,"Cell cycle-regulated gene of unknown function, promoter bound by Fkh2p; null mutant is sensitive to expression of the top1-T722A allele"
+NPR1,YNL183C,3.08,"Protein kinase that stabilizes several plasma membrane amino acid transporters by antagonizing their ubiquitin-mediated degradation; phosphorylates Aly2p; negatively regulates Ldb19p-mediated endocytosis through phosphorylation of Ldb19p, which prevents its association with the plasma membrane; Npr1p activity is negatively regulated via phosphorylation by the TOR complex"
+DUG3,YNL191W,2.29,Component of glutamine amidotransferase (GATase II); forms a complex with Dug2p to degrade glutathione (GSH) and other peptides containing a gamma-glu-X bond in an alternative pathway to GSH degradation by gamma-glutamyl transpeptidase (Ecm38p)
+POP1,YNL221C,3.01,"Subunit of both RNase MRP and nuclear RNase P; RNase MRP cleaves pre-rRNA, while nuclear RNase P cleaves tRNA precursors to generate mature 5' ends and facilitates turnover of nuclear RNAs; binds to the RPR1 RNA subunit in RNase P"
+JJJ1,YNL227C,2.22,"Co-chaperone that stimulates the ATPase activity of Ssa1p, required for a late step of ribosome biogenesis; associated with the cytosolic large ribosomal subunit; contains a J-domain; mutation causes defects in fluid-phase endocytosis"
+ICP55,YER078C,2.32,"Mitochondrial aminopeptidase; cleaves the N termini of at least 38 imported proteins after cleavage by the mitochondrial processing peptidase (MPP), thereby increasing their stability; member of the aminopeptidase P family"
+PDR16,YNL231C,2.76,"Phosphatidylinositol transfer protein (PITP) controlled by the multiple drug resistance regulator Pdr1p, localizes to lipid particles and microsomes, controls levels of various lipids, may regulate lipid synthesis, homologous to Pdr17p"
+LAP3,YNL239W,2.33,Cysteine aminopeptidase with homocysteine-thiolactonase activity; protects cells against homocysteine toxicity; has bleomycin hydrolase activity in vitro; transcription is regulated by galactose via Gal4p; orthologous to human BLMH
+NAR1,YNL240C,3.77,"Component of the cytosolic iron-sulfur (FeS) protein assembly machinery, required for maturation of cytosolic and nuclear FeS proteins and for normal resistance to oxidative stress; homologous to human Narf"
+ZWF1,YNL241C,2.68,"Glucose-6-phosphate dehydrogenase (G6PD), catalyzes the first step of the pentose phosphate pathway; involved in adapting to oxidatve stress; homolog of the human G6PD which is deficient in patients with hemolytic anemia"
+FOL1,YNL256W,2.97,"Multifunctional enzyme of the folic acid biosynthesis pathway, has dihydropteroate synthetase, dihydro-6-hydroxymethylpterin pyrophosphokinase, and dihydroneopterin aldolase activities"
+SIP3,YNL257C,2.58,"Protein that activates transcription through interaction with DNA-bound Snf1p, C-terminal region has a putative leucine zipper motif; potential Cdc28p substrate"
+MET2,YNL277W,33.82,"L-homoserine-O-acetyltransferase, catalyzes the conversion of homoserine to O-acetyl homoserine which is the first step of the methionine biosynthetic pathway"
+,YNL277W-A,2.5,YNL277W-A
+WSC2,YNL283C,2.87,Partially redundant sensor-transducer of the stress-activated PKC1-MPK1 signaling pathway involved in maintenance of cell wall integrity and recovery from heat shock; secretory pathway Wsc2p is required for the arrest of secretion response
+PCL1,YNL289W,3.6,"Cyclin, interacts with cyclin-dependent kinase Pho85p; member of the Pcl1,2-like subfamily, involved in the regulation of polarized growth and morphogenesis and progression through the cell cycle; localizes to sites of polarized cell growth"
+CLA4,YNL298W,2.21,"Cdc42p-activated signal transducing kinase of the PAK (p21-activated kinase) family, along with Ste20p and Skm1p; involved in septin ring assembly, vacuole inheritance, cytokinesis, sterol uptake regulation; phosphorylates Cdc3p and Cdc10p"
+TOS6,YNL300W,3.01,"Glycosylphosphatidylinositol-dependent cell wall protein, expression is periodic and decreases in respone to ergosterol perturbation or upon entry into stationary phase; depletion increases resistance to lactic acid"
+SKP2,YNL311C,3.83,"F-box protein of unknown function predicted to be part of an SCF ubiquitin protease complex; involved in regulating protein levels of sulfur metabolism enzymes; may interact with ribosomes, based on co-purification experiments"
+DAL82,YNL314W,3.01,"Positive regulator of allophanate inducible genes; binds a dodecanucleotide sequence upstream of all genes that are induced by allophanate; contains an UISALL DNA-binding, a transcriptional activation, and a coiled-coil domain"
+PHA2,YNL316C,2.63,"Prephenate dehydratase, catalyzes the conversion of prephanate to phenylpyruvate, which is a step in the phenylalanine biosynthesis pathway"
+MDJ2,YNL328C,2.03,Constituent of the mitochondrial import motor associated with the presequence translocase; function overlaps with that of Pam18p; stimulates the ATPase activity of Ssc1p to drive mitochondrial import; contains a J domain
+STP22,YCL008C,2.25,"Component of the ESCRT-I complex, which is involved in ubiquitin-dependent sorting of proteins into the endosome; homologous to the mouse and human Tsg101 tumor susceptibility gene; mutants exhibit a Class E Vps phenotype"
+AGA1,YNR044W,5.4,"Anchorage subunit of a-agglutinin of a-cells, highly O-glycosylated protein with N-terminal secretion signal and C-terminal signal for addition of GPI anchor to cell wall, linked to adhesion subunit Aga2p via two disulfide bonds"
+LYS9,YNR050C,3.26,"Saccharopine dehydrogenase (NADP+, L-glutamate-forming); catalyzes the formation of saccharopine from alpha-aminoadipate 6-semialdehyde, the seventh step in lysine biosynthesis pathway; exhibits genetic and physical interactions with TRM112"
+BIO4,YNR057C,10.23,"Dethiobiotin synthetase, catalyzes the third step in the biotin biosynthesis pathway; BIO4 is in a cluster of 3 genes (BIO3, BIO4, and BIO5) that mediate biotin synthesis; expression appears to be repressed at low iron levels"
+,YNR065C,3.97,YNR065C
+,YNR068C,4.85,YNR068C
+BSC5,YNR069C,5.18,Protein of unknown function; shows homology with N-terminal end of Bul1p; ORF exhibits genomic organization compatible with a translational readthrough-dependent mode of expression; readthrough expression includes YNR068C and the locus for this readthrough is termed BUL3; Bul3p is involved in ubiquitin-mediated sorting of plasma membrane proteins; readthrough and shortened forms of Bul3p interact with Rsp5p differently in vitro
+,YOL019W,3.39,YOL019W
+MDM38,YOL027C,2.29,"Mitochondrial protein, forms a complex with Mba1p to facilitate recruitment of mRNA-specific translational activators to ribosomes; roles in protein export and K+/H+ exchange; human ortholog Letm1 implicated in Wolf-Hirschhorn syndrome"
+GGC1,YDL198C,2.25,"Mitochondrial GTP/GDP transporter, essential for mitochondrial genome maintenance; has a role in mitochondrial iron transport; member of the mitochondrial carrier family"
+NUF2,YOL069W,3.11,"Component of the evolutionarily conserved kinetochore-associated Ndc80 complex (Ndc80p-Nuf2p-Spc24p-Spc25p); involved in chromosome segregation, spindle checkpoint activity and kinetochore clustering"
+,YOL107W,3.12,YOL107W
+PKP1,YIL042C,2.2,Mitochondrial protein kinase involved in negative regulation of pyruvate dehydrogenase complex activity by phosphorylating the ser-133 residue of the Pda1p subunit; acts in concert with kinase Pkp2p and phosphatases Ptc5p and Ptc6p
+MSB4,YOL112W,2.45,"GTPase-activating protein of the Ras superfamily that acts primarily on Sec4p, localizes to the bud site and bud tip, has similarity to Msb3p; msb3 msb4 double mutation causes defects in secretion and actin organization"
+SKM1,YOL113W,2.46,Member of the PAK family of serine/threonine protein kinases with similarity to Ste20p and Cla4p; involved in down-regulation of sterol uptake; proposed to be a downstream effector of Cdc42p during polarized growth
+MCH4,YOL119C,3.52,"Protein with similarity to mammalian monocarboxylate permeases, which are involved in transport of monocarboxylic acids across the plasma membrane; mutant is not deficient in monocarboxylate transport"
+RTC1,YOL138C,2.47,"Subunit of the SEA (Seh1-associated) complex, a coatomer-related complex that associates dynamically with the vacuole; null mutation suppresses cdc13-1 temperature sensitivity; has N-terminal WD-40 repeats and a C-terminal RING motif"
+ARG8,YOL140W,4.31,"Acetylornithine aminotransferase, catalyzes the fourth step in the biosynthesis of the arginine precursor ornithine"
+URE2,YNL229C,2.2,Nitrogen catabolite repression transcriptional regulator that acts by inhibition of GLN3 transcription in good nitrogen source; has glutathione peroxidase activity and can mutate to acquire GST activity; altered form creates [URE3] prion
+TIR2,YOR010C,3.88,Putative cell wall mannoprotein of the Srp1p/Tip1p family of serine-alanine-rich proteins; transcription is induced by cold shock and anaerobiosis
+HST3,YOR025W,6.58,"Member of the Sir2 family of NAD(+)-dependent protein deacetylases; involved along with Hst4p in telomeric silencing, cell cycle progression, radiation resistance, genomic stability and short-chain fatty acid metabolism"
+HMS1,YOR032C,2.29,Basic helix-loop-helix (bHLH) protein with similarity to myc-family transcription factors; overexpression confers hyperfilamentous growth and suppresses the pseudohyphal filamentation defect of a diploid mep1 mep2 homozygous null mutant
+,YOR032W-A,2.16,YOR032W-A
+BUD14,YAR014C,2.14,"Protein involved in bud-site selection, Bud14p-Glc7p complex is a cortical regulator of dynein; inhibitor of the actin assembly factor Bnr1p (formin); diploid mutants display a random budding pattern instead of the wild-type bipolar pattern"
+IRC23,YOR044W,2.07,Putative protein of unknown function; green fluorescent protein (GFP)-fusion localizes to the ER; null mutant displays increased levels of spontaneous Rad52p foci
+SGT1,YOR057W,2.02,Cochaperone protein; regulates activity of adenylyl cyclase Cyr1p; involved in kinetochore complex assembly; associates with the SCF (Skp1p/Cdc53p/F box protein) ubiquitin ligase complex; acts as a linker between Skp1p and HSP90 complexes
+YNG1,YOR064C,2.12,"Subunit of the NuA3 histone acetyltransferase complex that acetylates histone H3; contains PHD finger domain that interacts with methylated histone H3, has similarity to the human tumor suppressor ING1"
+PIN2,YOR104W,2.1,Protein that induces appearance of [PIN+] prion when overproduced; predicted to be palmitoylated
+LEU9,YOR108W,2.14,"Alpha-isopropylmalate synthase II (2-isopropylmalate synthase), catalyzes the first step in the leucine biosynthesis pathway; the minor isozyme, responsible for the residual alpha-IPMS activity detected in a leu4 null mutant"
+,YOR114W,5.52,YOR114W
+AFI1,YOR129C,2.67,"Arf3p polarization-specific docking factor, required for the polarized distribution of the ADP-ribosylation factor, Arf3p; participates in polarity development and maintenance of a normal haploid budding pattern; interacts with Cnm7p"
+ORT1,YOR130C,3.46,"Ornithine transporter of the mitochondrial inner membrane, exports ornithine from mitochondria as part of arginine biosynthesis; human ortholog is associated with hyperammonaemia-hyperornithinaemia-homocitrullinuria (HHH) syndrome"
+,YOR186W,2.38,YOR186W
+THI72,YOR192C,3.96,Transporter of thiamine or related compound; shares sequence similarity with Thi7p
+MRM1,YOR201C,3.01,"Ribose methyltransferase that modifies a functionally critical, conserved nucleotide in mitochondrial 21S rRNA"
+HIS3,YOR202W,2.55,"Imidazoleglycerol-phosphate dehydratase, catalyzes the sixth step in histidine biosynthesis; mutations cause histidine auxotrophy and sensitivity to Cu, Co, and Ni salts; transcription is regulated by general amino acid control via Gcn4p"
+GEP3,YOR205C,2.26,Protein required for mitochondrial ribosome small subunit biogenesis; null mutant is defective in respiration and in maturation of 15S rRNA; protein is localized to the mitochondrial inner membrane; null mutant interacts synthetically with prohibitin (phb1)
+SAS5,YOR213C,2.09,"Subunit of the SAS complex (Sas2p, Sas4p, Sas5p), which acetylates free histones and nucleosomes and regulates transcriptional silencing; stimulates Sas2p HAT activity"
+MCT1,YOR221C,4.95,"Predicted malonyl-CoA:ACP transferase, putative component of a type-II mitochondrial fatty acid synthase that produces intermediates for phospholipid remodeling"
+ISU2,YOR226C,7.9,"Conserved protein of the mitochondrial matrix, required for synthesis of mitochondrial and cytosolic iron-sulfur proteins, performs a scaffolding function in mitochondria during Fe/S cluster assembly; isu1 isu2 double mutant is inviable"
+,YOR228C,2.24,YOR228C
+KIN4,YOR233W,2.12,"Serine/threonine protein kinase that inhibits the mitotic exit network (MEN) when the spindle position checkpoint is activated; localized asymmetrically to mother cell cortex, spindle pole body and bud neck"
+DFR1,YOR236W,2.57,Dihydrofolate reductase involved in tetrahydrofolate biosynthesis; required for respiratory metabolism
+ENV9,YOR246C,2.58,"Protein proposed to be involved in vacuolar functions; mutant shows defect in CPY processing and defects in vacuolar morphology; has similarity to oxidoreductases, found in lipid particles; required for replication of Brome mosaic virus in S, cerevisiae, a model system for studying replication of positive-strand RNA viruses in their natural hosts"
+SRL1,YOR247W,2.15,"Mannoprotein that exhibits a tight association with the cell wall, required for cell wall stability in the absence of GPI-anchored mannoproteins; has a high serine-threonine content; expression is induced in cell wall mutants"
+,YOR262W,2.68,YOR262W
+PAC1,YOR269W,2.45,"Protein involved in nuclear migration, part of the dynein/dynactin pathway; targets dynein to microtubule tips, which is necessary for sliding of microtubules along bud cortex; synthetic lethal with bni1; homolog of human LIS1"
+FSF1,YOR271C,2.33,"Putative protein, predicted to be an alpha-isopropylmalate carrier; belongs to the sideroblastic-associated protein family; non-tagged protein is detected in purified mitochondria; likely to play a role in iron homeostasis"
+,YOR302W,3.42,YOR302W
+VPS41,YDR080W,2.13,Vacuolar membrane protein that is a subunit of the homotypic vacuole fusion and vacuole protein sorting (HOPS) complex; essential for membrane docking and fusion at the Golgi-to-endosome and endosome-to-vacuole stages of protein transport
+MCH5,YOR306C,2.08,"Plasma membrane riboflavin transporter; facilitates the uptake of vitamin B2; required for FAD-dependent processes; sequence similarity to mammalian monocarboxylate permeases, however mutants are not deficient in monocarboxylate transport"
+LDB19,YOR322C,2.11,"Protein involved in regulating the endocytosis of plasma membrane proteins by recruiting the ubiquitin ligase Rsp5p to its target; inhibited by Npr1p-mediated phosphorylation, which affects translocation between the cytosol and the plasma membrane; null mutant has reduced affinity for alcian blue dye"
+FRT1,YOR324C,2.45,"Tail-anchored ER membrane protein that is a substrate of the phosphatase calcineurin; interacts with homolog Frt2p; promotes cell growth in stress conditions, possibly via a role in posttranslational translocation"
+TEA1,YOR337W,3.62,Ty1 enhancer activator required for full levels of Ty enhancer-mediated transcription; C6 zinc cluster DNA-binding protein
+PIP2,YOR363C,5.23,"Autoregulatory oleate-specific transcriptional activator of peroxisome proliferation, contains Zn(2)-Cys(6) cluster domain, forms heterodimer with Oaf1p, binds oleate response elements (OREs), activates beta-oxidation genes"
+GPB1,YOR371C,2.58,"Multistep regulator of cAMP-PKA signaling; inhibits PKA downstream of Gpa2p and Cyr1p, thereby increasing cAMP dependency; promotes ubiquitin-dependent proteolysis of Ira2p; regulated by G-alpha protein Gpa2p; homolog of Gpb2p"
+NUD1,YOR373W,2.68,Component of the spindle pole body outer plaque; acts through the mitotic exit network to specify asymmetric spindle pole body inheritance
+SGF11,YPL047W,2.46,"Integral subunit of SAGA histone acetyltransferase complex, regulates transcription of a subset of SAGA-regulated genes, required for the Ubp8p association with SAGA and for H2B deubiquitylation"
+DIG1,YPL049C,2.35,"MAP kinase-responsive inhibitor of the Ste12p transcription factor, involved in the regulation of mating-specific genes and the invasive growth pathway; related regulators Dig1p and Dig2p bind to Ste12p"
+OAZ1,YPL052W,3.53,"Regulator of ornithine decarboxylase (Spe1p), antizyme that binds to Spe1p to stimulate ubiquitin-independent degradation by the proteasome; binding of polyamines to nascent Oaz1p during translation stimulates +1 ribosomal frameshifting, allowing translation of full-length Oaz1p"
+PDR12,YPL058C,6.98,"Plasma membrane ATP-binding cassette (ABC) transporter, weak-acid-inducible multidrug transporter required for weak organic acid resistance; induced by sorbate and benzoate and regulated by War1p; mutants exhibit sorbate hypersensitivity"
+RGL1,YPL066W,2.18,"Regulator of Rho1p signaling, cofactor of Tus1p; required for the localization of Tus1p during all phases of cytokinesis; green fluorescent protein (GFP)-fusion protein localizes to the bud neck and cytoplasm; null mutant is viable and exhibits growth defect on a non-fermentable (respiratory) carbon source"
+ARG81,YML099C,2.07,"Zinc-finger transcription factor of the Zn(2)-Cys(6) binuclear cluster domain type, involved in the regulation of arginine-responsive genes; acts with Arg80p and Arg82p"
+FRK1,YPL141C,2.57,Protein kinase of unknown cellular role; similar to Kin4p; green fluorescent protein (GFP)-fusion protein localizes to the cytoplasm; interacts with rRNA transcription and ribosome biogenesis factors and the long chain fatty acyl-CoA synthetase Faa3
+NPR3,YHL023C,2.06,"Subunit of SEA (Seh1-associated), Npr2/3, and Iml1p complexes; Npr2/3 complex mediates downregulation of TORC1 activity upon amino acid limitation; SEA complex is a coatomer-related complex that associates dynamically with the vacuole; Iml1p complex (Iml1p-Npr2p-Npr3p) is required for non-nitrogen-starvation (NNS)-induced autophagy; required for Npr2p phosphorylation and Iml1p-Npr2p interaction; null mutant shows delayed meiotic DNA replication and double-strand break repair"
+AIM44,YPL158C,2.13,Protein of unknown function; GFP-fusion protein localizes to the bud neck; transcription is regulated by Swi5p; null mutant displays elevated frequency of mitochondrial genome loss
+CUP9,YPL177C,2.26,"Homeodomain-containing transcriptional repressor of PTR2, which encodes a major peptide transporter; imported peptides activate ubiquitin-dependent proteolysis, resulting in degradation of Cup9p and de-repression of PTR2 transcription"
+MDM34,YGL219C,2.02,Mitochondrial component of the ERMES complex that links the ER to mitochondria and may promote inter-organellar calcium and phospholipid exchange as well as coordinating mitochondrial DNA replication and growth
+PUS1,YPL212C,2.4,"tRNA:pseudouridine synthase, introduces pseudouridines at positions 26-28, 34-36, 65, and 67 of tRNA; nuclear protein that appears to be involved in tRNA export; also acts on U2 snRNA"
+FAS2,YPL231W,3.21,"Alpha subunit of fatty acid synthetase, which catalyzes the synthesis of long-chain saturated fatty acids; contains the acyl-carrier protein domain and beta-ketoacyl reductase, beta-ketoacyl synthase and self-pantetheinylation activities"
+IQG1,YPL242C,2.87,"Essential protein required for determination of budding pattern, promotes localization of axial markers Bud4p and Cdc12p and functionally interacts with Sec3p, localizes to the contractile ring during anaphase, member of the IQGAP family"
+ICY2,YPL250C,4.97,Protein of unknown function; mobilized into polysomes upon a shift from a fermentable to nonfermentable carbon source; potential Cdc28p substrate
+YAH1,YPL252C,4.28,Ferredoxin of the mitochondrial matrix required for formation of cellular iron-sulfur proteins; involved in heme A biosynthesis; homologous to human adrenodoxin
+VIK1,YPL253C,2.49,"Protein that forms a complex with Kar3p at the spindle pole body, possible regulator of Kar3p function in microtubule-mediated processes; required for sister chromatid cohesion; has similarity to Cik1p"
+THI21,YPL258C,2.32,Hydroxymethylpyrimidine (HMP) and HMP-phosphate kinase; involved in thiamine biosynthesis; member of a gene family with THI20 and THI22; functionally redundant with Thi20p
+,YPL264C,7.19,YPL264C
+DIP5,YPL265W,2.54,"Dicarboxylic amino acid permease, mediates high-affinity and high-capacity transport of L-glutamate and L-aspartate; also a transporter for Gln, Asn, Ser, Ala, and Gly"
+KAR9,YPL269W,5.35,"Karyogamy protein required for correct positioning of the mitotic spindle and for orienting cytoplasmic microtubules, localizes at the shmoo tip in mating cells and at the tip of the growing bud in small-budded cells through anaphase"
+SAM3,YPL274W,6.25,"High-affinity S-adenosylmethionine permease, required for utilization of S-adenosylmethionine as a sulfur source; has similarity to S-methylmethionine permease Mmp1p"
+TAH18,YPR048W,2.01,"Conserved NAPDH-dependent diflavin reductase, component of an early step in the cytosolic Fe-S protein assembly (CIA) machinery; transfers electrons from NADPH to the Fe-S cluster of Dre2p; plays a pro-death role under oxidative stress"
+BRR1,YPR057W,2.64,"snRNP protein component of spliceosomal snRNPs, required for pre-mRNA splicing and snRNP biogenesis; in null mutant newly-synthesized snRNAs are destabilized and 3'-end processing is slowed"
+YMC1,YPR058W,2.52,"Mitochondrial protein, putative inner membrane transporter with a role in oleate metabolism and glutamate biosynthesis; member of the mitochondrial carrier (MCF) family; has similarity with Ymc2p"
+UBA3,YPR066W,2.06,"Protein that acts together with Ula1p to activate Rub1p before its conjugation to proteins (neddylation), which may play a role in protein degradation; GFP-fusion protein localizes to the cytoplasm in a punctate pattern"
+MDM36,YPR083W,2.54,Mitochondrial protein required for normal mitochondrial morphology and inheritance; proposed involvement in the formation of Dnm1p and Num1p-containing cortical anchor complexes that promote mitochondrial fission
+ISR1,YPR106W,2.45,"Predicted protein kinase, overexpression causes sensitivity to staurosporine, which is a potent inhibitor of protein kinase C"
+WHI2,YOR043W,2.01,"Protein required, with binding partner Psr1p, for full activation of the general stress response, possibly through Msn2p dephosphorylation; regulates growth during the diauxic shift; negative regulator of G1 cyclin expression"
+ANT1,YPR128C,2.09,Peroxisomal adenine nucleotide transporter; involved in beta-oxidation of medium-chain fatty acid; required for peroxisome proliferation
+MET16,YPR167C,11.37,"3'-phosphoadenylsulfate reductase, reduces 3'-phosphoadenylyl sulfate to adenosine-3',5'-bisphosphate and free sulfite using reduced thioredoxin as cosubstrate, involved in sulfate assimilation and methionine metabolism"
+NUT2,YPR168W,3.18,Subunit of the RNA polymerase II mediator complex; associates with core polymerase subunits to form the RNA polymerase II holoenzyme; required for transcriptional activation and has a role in basal transcription
+,,,
