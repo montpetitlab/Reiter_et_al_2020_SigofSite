@@ -1,0 +1,7 @@
+channels:
+   - r
+   - conda-forge
+   - bioconda
+   - defaults
+dependencies:
+   - r-phylotools=0.2.2
