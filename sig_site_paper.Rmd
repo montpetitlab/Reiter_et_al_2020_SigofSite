@@ -1,0 +1,2738 @@
+---
+title: "Transcriptomics provides a genetic signature of vineyard site with insight into vintage-independent regional wine characteristics"
+always_allow_html: yes
+graphics: yes
+figsintext: yes
+geometry: "left=1in,right=1in,top=1in,bottom=1in"
+header-includes:
+- \usepackage{booktabs}
+- \usepackage{verbatim}
+- \newcommand{\comm}[1]{}
+- \usepackage{float} \floatplacement{figure}{H}
+- \newcommand{\beginsupplement}{\setcounter{table}{0}  \renewcommand{\thetable}{S\arabic{table}}
+  \setcounter{figure}{0} \renewcommand{\thefigure}{S\arabic{figure}}}
+- \usepackage[font={small,it}, labelfont={bf}]{caption}
+- \usepackage{setspace}
+- \singlespacing
+- \usepackage{lineno}
+- \linenumbers
+keep_tex: yes
+output:
+  bookdown::pdf_document2:
+    fig_caption: yes
+    toc: false
+---
+
+```{r setup, include=FALSE, eval = T}
+knitr::opts_chunk$set(echo = F, eval = T, message = F, warning = F, cache = T, 
+                      include = T, fig.keep = 'high', fig.path = "Rmd_fig_out/",
+                      dpi=400)
+```
+
+```{r libraries}
+library(dplyr)
+library(readr)
+library(purrr)
+library(stringr)
+library(tibble)
+library(tidyr)
+library(ggplot2)
+library(ranger)
+library(caret)
+library(vegan)
+library(phyloseq)
+library(microbiome)
+library(microbiomeutilities)
+library(geosphere)
+library(viridis)
+library(ggpubr)
+library(ggcorrplot)
+library(ggthemes)
+library(ggpmisc)
+library(RColorBrewer)
+library(xlsx)
+library(kableExtra)
+library(knitr)
+set.seed(1)
+source("scripts/ggplotConfusionMatrix.R")
+```
+
+```{r colors_organisms}
+viridian         = "#4b9179ff" # Green with a hint of blue
+selective_yellow = "#ffb500ff" # Excavator yellow
+rose             = "#e8829d"
+steel_blue       = "#3e80b8ff" 
+white_rock       = "#f1ece0ff" # Lighter off-white
+newblack         = "#0e3452ff" # Almost black, blue-tinted
+purple           = "#5906a1"
+red              = "#8B0000"
+aqua             = "#ace9e7"
+cyan             = "#72a19f"
+mauve            = "#b889b6"
+mint             = "#addea6"  
+orange           = "#f68902"
+light_brown      = "#ba8f80"
+bright_green     = "#23f210"
+grey_yellow      = "#6b6b67"
+grey             = "#575757"
+brown_grey       = "#a0a0a0"
+```
+
+```{r colors_avas}
+#  ordered south to north
+srh = "#FFAABB" # pink
+smv = "#EE8866" # orange
+as  = "#EEDD88" # light yellow
+snc = "#99DDFF" # light cyan 
+crn = "#AAAA00" # olive
+rrv = "#BBCC33" # pear 
+av  = "#77AADD" # light blue
+or  = "#DDDDDD" # pale grey
+```
+
+```{r functions}
+orf_to_common <- function(keys){
+  common <- AnnotationDbi::select(org.Sc.sgd.db::org.Sc.sgd.db,
+                                  keys = keys,
+                                  columns=c("COMMON", "DESCRIPTION"),
+                                  keytype="ORF")
+  common <- common %>%
+    group_by(ORF) %>%
+    dplyr::slice(1)
+  return(common)
+}
+
+
+parse_kegg_enriched <- function(enriched_result, pathway){
+  enriched_genes <- enriched_result@result %>%
+    filter(Description == pathway)
+  enriched_genes <- read.delim(textConnection(enriched_genes$geneID), sep = "/",
+                             header = F) %>%
+    t() %>%
+    as.data.frame() %>%
+    distinct()
+  
+  enriched_genes <- orf_to_common(enriched_genes$V1)
+  enriched_genes <- enriched_genes %>%
+    group_by(ORF) %>%
+    slice(1)
+  
+  return(enriched_genes) 
+}
+```
+
+# Results and Discussion 
+
+## DNA abundance by ribosomal amplicon sequencing is a poor predictor of detectable gene expression during fermentation
+
+
+```{r bac_tax_contam}
+bac_tax_contam <- read_tsv("~/github/pn_amp/2019/outputs/16s/dada2/ASV_taxonomy.tsv") %>%
+  filter(Family == "Mitochondria" | Order == "Chloroplast")
+```
+
+```{r import_as_phyloseq}
+#  metadata
+info_micro <- read_csv("samples_micro.csv") %>%
+  mutate(year_ava = paste0(year, "_", ava_id)) %>%
+  column_to_rownames("micro_id") %>%
+  as.data.frame() 
+info_micro$ava <- factor(info_micro$ava, levels = c("OR", "AV", "SNC", "RRV", "CRN", "AS", "SMV", "SRH"))
+info_micro$ava_id <- factor(info_micro$ava_id, levels = c("OR1", "OR2", "AV1", "AV2", "SNC1",
+                                                         "SNC2", "RRV1", "RRV2", "RRV3", "CRN1",
+                                                         "AS1", "AS2", "SMV1", "SMV2", "SRH1"))
+info_micro$year <- as.character(info_micro$year)
+
+# all bacterial phyloseq obj
+bac_dada <- read_tsv("../pn_amp/2019/outputs/16s/dada2/ASV_counts.tsv") %>%
+  filter(!X1 %in% bac_tax_contam$X1) %>%                       # remove cholorplast and mitochondria
+  column_to_rownames("X1") %>%                                 # make samples rownames
+  as.data.frame()                                              # convert to DF
+bac_dada <- bac_dada[ , which(colnames(bac_dada) %in% rownames(info_micro))] # filt to bac dada w metadata
+bac_dada <- bac_dada[ , match(rownames(info_micro), colnames(bac_dada))] # order bac_dada same as info_micro
+
+bac_tax <- read_tsv("~/github/pn_amp/2019/outputs/16s/dada2/ASV_taxonomy.tsv") %>%
+  filter(!X1 %in% bac_tax_contam$X1) %>%
+  column_to_rownames("X1") %>%
+  as.data.frame()
+bac_physeq <- phyloseq(otu_table(bac_dada, taxa_are_rows = T),
+                       tax_table(as.matrix(bac_tax)),
+                       sample_data(info_micro))
+
+# all fungi phyloseq obj
+fun_dada <- read_tsv("../pn_amp/2019/outputs/ITS/dada2/ASV_counts.tsv") %>%
+  column_to_rownames("X1") %>%                                 # make samples rownames
+  as.data.frame()                                              # convert to DF
+fun_dada <- fun_dada[ , which(colnames(fun_dada) %in% rownames(info_micro))] # filt to fun dada w metadata
+fun_dada <- fun_dada[ , match(rownames(info_micro), colnames(fun_dada))] # order fun_dada same as info_micro
+
+fun_tax <- read_tsv("~/github/pn_amp/2019/outputs/ITS/dada2/ASV_taxonomy.tsv") %>%
+  mutate(Kingdom = gsub("k__", "", Kingdom)) %>%
+  mutate(Phylum = gsub("p__", "", Phylum)) %>%
+  mutate(Class = gsub("c__", "", Class)) %>%
+  mutate(Order = gsub("o__", "", Order)) %>%
+  mutate(Family = gsub("f__", "", Family)) %>%
+  mutate(Genus = gsub("g__", "", Genus)) %>%
+  mutate(Species = gsub("s__", "", Species)) %>%
+  mutate(name = paste0(Genus, " ", Species)) %>%
+  column_to_rownames("X1") %>%
+  as.data.frame() 
+fun_physeq <- phyloseq(otu_table(fun_dada, taxa_are_rows = T),
+                       tax_table(as.matrix(fun_tax)),
+                       sample_data(info_micro))
+
+```
+
+```{r find_core}
+find_core <- function(phyloseq){
+  core <- core_members(phyloseq %>% transform("compositional"), detection = 0.0001, prevalence = 0.9)
+  core_ps <- prune_taxa(core, phyloseq %>% transform("compositional"))
+  quants <- otu_table(core_ps) %>%  # grab otu table in compositional format
+    t() %>%                         # transpose so ASVs are columns
+    as.data.frame() %>%             # convert to df for dplyr compatibility
+    dplyr::summarize(across(is.numeric, quantile)) %>% # summarize quantiles
+    t() %>%                         # transpose so quatiles become columns
+    as.data.frame() %>%
+    rownames_to_column("ASV") %>%   # preserve ASV names
+    select(ASV,`0`="V1",`25`="V2", `50`="V3",`75`="V4",`100`="V5") # name cols
+  taxtab <- tax_table(core_ps)[core] %>% as.data.frame %>% rownames_to_column("ASV") 
+  coretab <- left_join(taxtab, quants, by="ASV")
+  return(coretab)
+}
+
+bac_core <- find_core(bac_physeq)
+fun_core <- find_core(fun_physeq)
+```
+
+```{r compositionplots, fig.height=6}
+bac_physeq_phylum <- aggregate_top_taxa(bac_physeq, level = "Class", top = 10)
+
+bac_physeq_phylum_rel <- microbiome::transform(bac_physeq_phylum, "compositional")
+bac_physeq_phylum_rel <- merge_samples(bac_physeq_phylum_rel, group = "year_ava")
+sample_data(bac_physeq_phylum_rel)$ava_id <- gsub("201[679]_", "", rownames(sample_data(bac_physeq_phylum_rel)))
+sample_data(bac_physeq_phylum_rel)$ava <- gsub("[123]", "", sample_data(bac_physeq_phylum_rel)$ava_id)
+sample_data(bac_physeq_phylum_rel)$ava <- factor(sample_data(bac_physeq_phylum_rel)$ava, 
+                               levels = c("OR", "AV", "SNC", "RRV", "CRN", "AS", "SMV", "SRH"))
+
+bac_plot_comp_rel <- plot_composition(bac_physeq_phylum_rel, x.label = "ava_id", 
+                                      group_by = "year", sample.sort = "ava") + 
+  guides(fill = guide_legend(label.theme = element_text(size = 6, face = "italic", colour = "Black", angle = 0))) + 
+  theme_bw() + 
+  labs(y = "relative abundance") +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90),
+        axis.title.x = element_blank(),
+        legend.title = element_text(size=10),
+        legend.text = element_text(size=10),
+        strip.text.x = element_text(size = 10, face = "bold"),
+        strip.background = element_blank(),
+        panel.background = element_blank(), 
+        panel.grid =  element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2)) +
+  scale_fill_brewer("Class", palette = "Paired") +
+  scale_y_continuous(breaks = c(0, 1, 2, 3, 4),
+                     labels = c('0', "0.25", "0.50", '0.75', '1.00'))
+
+fun_physeq_class <- aggregate_top_taxa(fun_physeq, level = "Class", top = 10)
+fun_physeq_class_rel <- microbiome::transform(fun_physeq_class, "compositional")
+fun_physeq_class_rel <- merge_samples(fun_physeq_class_rel, group = "year_ava")
+sample_data(fun_physeq_class_rel)$ava_id <- gsub("201[679]_", "", rownames(sample_data(fun_physeq_class_rel)))
+sample_data(fun_physeq_class_rel)$ava <- gsub("[123]", "", sample_data(fun_physeq_class_rel)$ava_id)
+sample_data(fun_physeq_class_rel)$ava <- factor(sample_data(fun_physeq_class_rel)$ava, 
+                               levels = c("OR", "AV", "SNC", "RRV", "CRN", "AS", "SMV", "SRH"))
+
+fun_plot_comp_rel <- plot_composition(fun_physeq_class_rel, x.label = "ava_id", 
+                                      group_by = "year", sample.sort = "ava") + 
+  guides(fill = guide_legend(label.theme = element_text(size = 6, face = "italic", colour = "Black", angle = 0))) + 
+  theme_bw() + 
+  labs(y = "relative abundance") +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90),
+        axis.title.x = element_blank(),
+        legend.title = element_text(size=10),
+        legend.text  = element_text(size=10),
+        strip.text.x = element_text(size = 10, face = "bold"),
+        strip.background = element_blank(),
+        panel.background = element_blank(), 
+        panel.grid =  element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2)) +
+  scale_fill_brewer("Class", palette = "Set3") +
+  scale_y_continuous(breaks = c(0, 1, 2, 3, 4),
+                     labels = c('0', "0.25", "0.50", '0.75', '1.00'))
+
+ggarrange(bac_plot_comp_rel, fun_plot_comp_rel, labels = c("", ""),
+          ncol = 1)
+```
+
+```{r info_gather}
+info_gather <- read_csv("samples_ava.csv") %>%
+  filter(!is.na(tank)) %>%
+  filter(hr >10) %>%
+  filter(hr < 38 | hr > 46) %>%
+  filter(hr <74 | hr >89) %>%
+  select(id, ts_sum_id, micro_id, year, tank, tank_letter, ava_id, ava)
+
+# re-add MSA and P5A
+info2_gather <- read_csv("samples_ava.csv") %>%
+  filter(ava_id %in% c("AS1", "AS2")) %>%
+  filter(year == 2017) %>%
+  filter(hr > 70) %>%
+  select(id, ts_sum_id, micro_id, year, tank, tank_letter, ava_id, ava)
+
+info_gather <- rbind(info2_gather, info_gather)
+info_gather$ava <- factor(info_gather$ava, levels = c("OR", "AV", "SNC", "RRV", "CRN", "AS", "SMV", "SRH"))
+info_gather$ava_id <- factor(info_gather$ava_id, levels = c("OR1", "OR2", "AV1", "AV2", "SNC1", 
+                                              "SNC2", "RRV1", "RRV2", "RRV3", "CRN1", 
+                                              "AS1", "AS2", "SMV1", "SMV2", "SRH1"))
+```
+
+```{r sourmash_gather_19, eval = F}
+files19 <- list.files("v2019/outputs/gather", ".csv$", full.names = T)
+
+gather19 <- files19 %>% 
+  purrr::set_names() %>%
+  map_dfr(read_csv, .id = "id") %>%
+  mutate(id = gsub("v2019\\/outputs\\/gather\\/", "", id)) %>%
+  mutate(id = gsub("_gather\\.csv", "", id)) %>%
+  filter(id %in% info_gather$id) %>%
+  left_join(info_gather, by = "id") %>%
+  mutate(year = 2019)
+  
+gather19$clean_name <- gsub("final.contigs.fa", "MEGAHIT Saccharomyces cerevisiae RC212", gather19$name)
+gather19$clean_name <- gsub("\\(.*", "", gather19$clean_name)
+gather19$clean_name <- gsub("\\s+", " ", str_trim(gather19$clean_name))
+gather19$clean_name <- gsub("Aureobasidium pullulans var. pullulans EXF-150, assembly version ", "", gather19$clean_name)
+gather19$clean_name <- gsub("Cgr1.0 # ", "", gather19$clean_name)   
+gather19$clean_name <- gsub("Huva2.0 # ", "", gather19$clean_name)
+species19 <- colsplit(gather19$clean_name, " ", c("accession", "species"))
+gather19 <- as.data.frame(cbind(gather19, species19))
+
+gather19 <- gather19 %>%
+  separate(col = species, into=c("genus", "species", "strain"), sep= " ") %>%
+  unite(col = "species", genus, species, sep=" ")
+```
+
+```{r sourmash_gather_17, eval = F}
+files17 <- list.files("v2017/outputs/gather", ".csv$", full.names = T)
+
+gather17 <- files17 %>% 
+  purrr::set_names() %>%
+  map_dfr(read_csv, .id = "id") %>%
+  mutate(id = gsub("v2017\\/outputs\\/gather\\/", "", id)) %>%
+  mutate(id = gsub("_gather\\.csv", "", id)) %>%
+  filter(id %in% info_gather$id) %>%
+  left_join(info_gather, by = "id") %>%
+  filter(name != "Mm_Celera  Mus musculus (house mouse)") %>%
+  mutate(year = 2017)
+  
+gather17$clean_name <- gsub("final.contigs.fa", "MEGAHIT Saccharomyces cerevisiae RC212", gather17$name)
+gather17$clean_name <- gsub("\\(.*", "", gather17$clean_name)
+gather17$clean_name <- gsub("\\s+", " ", str_trim(gather17$clean_name))
+gather17$clean_name <- gsub("Aureobasidium pullulans var. pullulans EXF-150, assembly version ", "", gather17$clean_name)
+gather17$clean_name <- gsub("Cgr1.0 # ", "", gather17$clean_name)   
+gather17$clean_name <- gsub("Huva2.0 # ", "", gather17$clean_name)
+species17 <- colsplit(gather17$clean_name, " ", c("accession", "species"))
+gather17 <- as.data.frame(cbind(gather17, species17))
+
+gather17 <- gather17 %>%
+  separate(col = species, into=c("genus", "species", "strain"), sep= " ") %>%
+  unite(col = "species", genus, species, sep=" ")
+```
+
+```{r combine_gather, eval = F}
+gather <- rbind(gather17, gather19)
+gather$site <- as.factor(gather$site)
+gather$year <- as.factor(gather$year)
+gather$species <- gsub("Aureobasidium sp.", "Aureobasidium sp. FSWF8-4", gather$species)
+gather$species <- as.factor(gather$species)
+gather <- gather %>% 
+  filter(species != "Tatumella sp.")
+```
+
+```{r gather_plots, eval = F}
+# Plot dominant organisms ----------------------------------------------
+  
+plt19_big <- ggplot(gather %>% 
+                      filter(year == 2019) %>%
+                      filter(species %in% c("Saccharomyces cerevisiae", "Vitis vinifera", 
+                                            "Starmerella bacillaris", "Hanseniaspora uvarum",
+                                            "Metschnikowia fructicola")), 
+                    aes(x = ava_id, y = f_unique_weighted/6, fill = species))  +
+  geom_bar(stat = "identity", position = "stack") +
+  ggtitle("2019") +
+  theme(#axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 10),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(colour = "black", size = 8), 
+        axis.title.y = element_blank(), 
+        axis.title.x = element_blank(), 
+        legend.title = element_text(size = 11, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 7, color = "black", face = "italic"),
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank(),
+        plot.title = element_text(hjust=0.5)) +
+  scale_fill_manual(values = c("Hanseniaspora uvarum" = newblack, "Metschnikowia fructicola" = mauve,
+                               "Saccharomyces cerevisiae" = white_rock, "Starmerella bacillaris" = aqua, 
+                               "Vitis vinifera" = purple, 
+                               "Aureobasidium pullulans" = brown_grey, "Aureobasidium sp. FSWF8-4" = red,
+                               "Botryotinia fuckeliana" = grey, "Botrytis cinerea" = cyan, 
+                               "Hanseniaspora opuntiae" = selective_yellow, "Hanseniaspora vineae" = grey_yellow,
+                               "Lachancea thermotolerans" = mint,
+                               "Pichia kudriavzevii" = steel_blue, 
+                               "Preussia sp." = orange, "Rhizopus stolonifer" = viridian),
+                    drop = F)
+
+# plot minor organisms -----------------------------------------------------
+
+plt19_small <- ggplot(gather %>% 
+                      filter(year == 2019) %>% 
+                        filter(species != "Saccharomyces cerevisiae") %>%
+                        filter(species != "Vitis vinifera") %>%
+                        filter(species != "Starmerella bacillaris") %>%
+                        filter(species != "Hanseniaspora uvarum") %>%
+                        filter(species != "Metschnikowia fructicola"), 
+                      aes(x = ava_id, y = f_unique_weighted/6, fill = species)) +
+  geom_bar(stat = "identity", position = "stack") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 8),
+        axis.text.y = element_text(colour = "black", size = 8), 
+        axis.title.y = element_blank(), 
+        axis.title.x = element_blank(), 
+        legend.title = element_text(size = 11, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 7, color = "black", face = "italic"),
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank()) +
+  scale_x_discrete(drop=FALSE) +
+  ylim(c(0, .003)) +
+  scale_fill_manual(values = c("Hanseniaspora uvarum" = newblack, "Metschnikowia fructicola" = mauve,
+                               "Saccharomyces cerevisiae" = white_rock, "Starmerella bacillaris" = aqua, 
+                               "Vitis vinifera" = purple, 
+                               "Aureobasidium pullulans" = brown_grey, "Aureobasidium sp. FSWF8-4" = red,
+                               "Botryotinia fuckeliana" = grey, "Botrytis cinerea" = cyan, 
+                               "Hanseniaspora opuntiae" = selective_yellow, "Hanseniaspora vineae" = grey_yellow,
+                               "Lachancea thermotolerans" = mint, "Pichia kudriavzevii" = steel_blue,
+                               "Preussia sp." = orange, "Rhizopus stolonifer" = viridian),
+                    drop = F)
+
+# Plot dominant organisms ----------------------------------------------
+
+
+plt17_big <- ggplot(gather %>% 
+                      filter(year == 2017) %>%
+                      filter(species %in% c("Saccharomyces cerevisiae", "Vitis vinifera", 
+                                            "Starmerella bacillaris", "Hanseniaspora uvarum",
+                                            "Metschnikowia fructicola")), 
+                    aes(x = ava_id, y = f_unique_weighted/6, fill = species)) +
+  geom_bar(stat = "identity", position = "stack") +
+  ggtitle("2017") +
+  theme(#axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 8),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(colour = "black", size = 8), 
+        axis.title.y = element_blank(), 
+        axis.title.x = element_blank(), 
+        legend.title = element_text(size = 11, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 7, color = "black", face = "italic"),
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank(),
+        plot.title = element_text(hjust=0.5)) +
+  scale_x_discrete(drop = F) +
+  scale_fill_manual(values = c("Hanseniaspora uvarum" = newblack, "Metschnikowia fructicola" = mauve,
+                               "Saccharomyces cerevisiae" = white_rock, "Starmerella bacillaris" = aqua, 
+                               "Vitis vinifera" = purple, 
+                               "Aureobasidium pullulans" = brown_grey, "Aureobasidium sp. FSWF8-4" = red,
+                               "Botryotinia fuckeliana" = grey, "Botrytis cinerea" = cyan, 
+                               "Hanseniaspora opuntiae" = selective_yellow, "Hanseniaspora vineae" = grey_yellow,
+                               "Lachancea thermotolerans" = mint,
+                               "Pichia kudriavzevii" = steel_blue,
+                               "Preussia sp." = orange, "Rhizopus stolonifer" = viridian),
+                    drop = F)
+
+# plot minor organisms -----------------------------------------------------
+plt17_small <- ggplot(gather %>% 
+                        filter(year == 2017) %>%
+                        filter(species != "Saccharomyces cerevisiae") %>%
+                        filter(species != "Vitis vinifera") %>%
+                        filter(species != "Starmerella bacillaris") %>%
+                        filter(species != "Hanseniaspora uvarum") %>%
+                        filter(species != "Metschnikowia fructicola"), 
+                      aes(x = ava_id, y = f_unique_weighted/6, fill = species)) +
+  geom_bar(stat = "identity", position = "stack") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 8),
+        axis.text.y = element_text(colour = "black", size = 8), 
+        axis.title.y = element_blank(), 
+        axis.title.x = element_blank(), 
+        legend.title = element_text(size = 11, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 7, color = "black", face = "italic"),
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank()) +
+  scale_x_discrete(drop = F) +
+  scale_fill_manual(values = c("Hanseniaspora uvarum" = newblack, "Metschnikowia fructicola" = mauve,
+                               "Saccharomyces cerevisiae" = white_rock, "Starmerella bacillaris" = aqua, 
+                               "Vitis vinifera" = purple, 
+                               "Aureobasidium pullulans" = brown_grey, "Aureobasidium sp. FSWF8-4" = red,
+                               "Botryotinia fuckeliana" = grey, "Botrytis cinerea" = cyan, 
+                               "Hanseniaspora opuntiae" = selective_yellow, "Hanseniaspora vineae" = grey_yellow,
+                               "Lachancea thermotolerans" = mint,
+                               "Pichia kudriavzevii" = steel_blue,
+                               "Preussia sp." = orange, "Rhizopus stolonifer" = viridian),
+                    drop = F)
+```
+
+```{r plotgather, eval = F}
+ggarrange(plt17_big, plt19_big, plt17_small, plt19_small, ncol = 2, nrow = 2, 
+          common.legend = T, legend = "right", heights = c(.9, 1 ))
+```
+
+```{r mapped_counts_transcriptome}
+counts <- readRDS("rna_seq/site/summarized_counts.RDS") %>%
+  dplyr::select(ts_sum_id, ends_with("_mean")) %>%
+  pivot_longer(cols = ends_with("_mean"), names_to = "gene", values_to = "count") %>%
+  mutate(organism = gsub("_.*", "", gene))
+
+# left_join with info to get year, AVA code
+counts <- counts %>%
+  left_join(info_gather, by = c("ts_sum_id")) %>%
+  dplyr::select(-id) %>%
+  distinct()
+# mutate the organism name to species name
+counts <- counts %>%
+  mutate(organism = gsub("KLTH0.*", "KLTH0", organism)) %>%
+  mutate(organism = gsub("PEGC.*", "PEGC", organism)) %>%
+  mutate(organism = gsub("MWSF.*", "MWSF", organism)) %>%
+  mutate(organism = gsub("^Y.*", "scer", organism)) %>%
+  mutate(organism = gsub("sn.*", "scer", organism)) %>%
+  mutate(organism = gsub("LPNK.*", "LPNK", organism)) %>%
+  mutate(organism = gsub("^t.*", "scer", organism)) %>%
+  mutate(organism = gsub("RPR1", "scer", organism)) %>%
+  mutate(organism = gsub("SCR1", "scer", organism)) %>%
+  mutate(organism = gsub("TLC1", "scer", organism)) %>%
+  mutate(organism = gsub("LSR1", "scer", organism)) %>%
+  mutate(organism = gsub("PWR1", "scer", organism)) %>%
+  mutate(organism = gsub("NME1", "scer", organism)) %>%
+  mutate(organism = gsub("ICR1", "scer", organism)) %>%
+  mutate(organism = gsub("RUF23", "scer", organism)) %>%
+  mutate(organism = gsub("RNA170", "scer", organism)) %>%
+  mutate(organism = gsub("ZOD1", "scer", organism)) %>%
+  mutate(organism = gsub("IRT1", "scer", organism)) %>%
+  mutate(organism = gsub("RUF20", "scer", organism)) %>%
+  mutate(organism = gsub("RUF21", "scer", organism)) %>%
+  mutate(organism = gsub("RUF22", "scer", organism)) %>%
+  mutate(organism = gsub("RUF5-2", "scer", organism)) %>%
+  mutate(organism = gsub("SRG1", "scer", organism)) %>%
+  mutate(organism = gsub("RME2", "scer", organism)) %>%
+  mutate(organism = gsub("RME3", "scer", organism)) %>%
+  mutate(organism = gsub("RDN5-1", "scer", organism)) %>%
+  mutate(organism = gsub("RDN37-2", "scer", organism)) %>%
+  mutate(organism = gsub("HRA1", "scer", organism)) %>%
+  mutate(organism = gsub("KLTH0", "Lachancea thermotolerans", organism)) %>%
+  mutate(organism = gsub("PEGC", "Cladosporium sp. SL-16", organism)) %>%
+  mutate(organism = gsub("MWSF", "Starmerella bacillaris", organism)) %>%
+  mutate(organism = gsub("LPNK", "Metschnikowia sp. AWRI3582", organism)) %>%
+  mutate(organism = gsub("scer", "Saccharomyces cerevisiae", organism)) %>%
+  mutate(organism = gsub("BCIN", "Botrytis cinerea", organism)) %>%
+  mutate(organism = gsub("BcDW1", "Botrytis cinerea", organism)) %>%
+  mutate(organism = gsub("VIT", "Vitis vinifera", organism)) %>%
+  mutate(organism = gsub("CU098", "Rhizopus stolonifer", organism)) %>%
+  mutate(organism = gsub("metfru2", "Metschnikowia fructicola", organism)) %>%
+  mutate(organism = gsub("M438DRAFT", "Aureobasidium pullulans", organism)) %>%
+  mutate(organism = gsub("AWRI3578", "Hanseniaspora opuntiae", organism)) %>%
+  mutate(organism = gsub("C5L36", "Pichia kudriavzevii", organism)) %>%
+  mutate(organism = gsub("D499", "Hanseniaspora uvarum", organism)) %>%
+  mutate(organism = gsub("D6D18", "Aureobasidium pullulans", organism))
+```
+
+```{r mappedcountstranscriptomeplt}
+
+counts_plt <- counts %>%
+  group_by(ava_id, year, organism) %>%
+  summarize(total_count = sum(count))
+
+plt_all <- ggplot(counts_plt, aes(x = ava_id, y = total_count/2, fill = organism)) +
+  geom_col() +
+  labs(y = "relative abundance") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 8),
+        axis.text.y = element_text(colour = "black", size = 8), 
+        axis.title.x = element_blank(), 
+        strip.text.x = element_text(size = 10, face = "bold"),
+        strip.background = element_blank(),
+        legend.title = element_text(size = 11, colour = "black"), 
+        legend.text = element_text(size = 7, color = "black", face = "italic"),
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank()) +
+  scale_x_discrete(drop=FALSE) +
+  facet_wrap(~year) +
+  scale_fill_manual(name = "species", drop = F,
+                    values = c("Hanseniaspora uvarum" = newblack, 
+                               "Metschnikowia fructicola" = mauve,
+                               "Metschnikowia sp. AWRI3582" = "pink",
+                               "Saccharomyces cerevisiae" = white_rock, 
+                               "Starmerella bacillaris" = aqua, 
+                               "Vitis vinifera" = purple, 
+                               "Cladosporium sp. SL-16" = "khaki",
+                               "Aureobasidium pullulans" = brown_grey, 
+                               "Aureobasidium sp. FSWF8-4" = red,
+                               "Botryotinia fuckeliana" = grey, 
+                               "Botrytis cinerea" = cyan, 
+                               "Hanseniaspora opuntiae" = selective_yellow, 
+                               "Hanseniaspora vineae" = grey_yellow,
+                               "Lachancea thermotolerans" = mint,
+                               "Pichia kudriavzevii" = steel_blue,
+                               "Rhizopus stolonifer" = viridian))
+
+plt_small <- ggplot(counts_plt, aes(x = ava_id, y = total_count/2, fill = organism)) +
+  geom_col() +
+  labs(y = "relative abundance") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 8),
+        axis.text.y = element_text(colour = "black", size = 8), 
+        axis.title.x = element_blank(),
+        strip.text.x = element_text(size = 10, face = "bold"),
+        strip.background = element_blank(),
+        legend.title = element_text(size = 11, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 7, color = "black", face = "italic"),
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank()) +
+  scale_x_discrete(drop=FALSE) +
+  facet_wrap(~year) +
+  ylim(c(0, .029)) +
+  scale_fill_manual(name = "species", drop = F,
+                    values = c("Hanseniaspora uvarum" = newblack, 
+                               "Metschnikowia fructicola" = mauve,
+                               "Metschnikowia sp. AWRI3582" = "pink",
+                               "Saccharomyces cerevisiae" = white_rock, 
+                               "Starmerella bacillaris" = aqua, 
+                               "Vitis vinifera" = purple, 
+                               "Cladosporium sp. SL-16" = "khaki",
+                               "Aureobasidium pullulans" = brown_grey, 
+                               "Aureobasidium sp. FSWF8-4" = red,
+                               "Botryotinia fuckeliana" = grey, 
+                               "Botrytis cinerea" = cyan, 
+                               "Hanseniaspora opuntiae" = selective_yellow, 
+                               "Hanseniaspora vineae" = grey_yellow,
+                               "Lachancea thermotolerans" = mint,
+                               "Pichia kudriavzevii" = steel_blue,
+                               "Rhizopus stolonifer" = viridian))
+ggarrange(plt_all, plt_small, labels = c(" ", " "), nrow =2, common.legend = T,
+          legend = "bottom")
+```
+
+```{r calc_num_fungal_species}
+fun_physeq_species <- aggregate_taxa(fun_physeq, level =  "name")
+tmp <- tax_table(fun_physeq_species) %>% 
+  as.data.frame() %>%
+  filter(Species != "Unknown")
+# # check gather first. Gather isn't filtered to only contain organisms that appear in multiple fermentations (see methods)
+# as.character(unique(gather$species))[as.character(unique(gather$species)) %in% tmp$name]
+# # then check other metric
+# unique(counts$organism)[unique(counts$organism) %in% tmp$name]
+```
+
+```{r dna_in_rna, eval = F}
+dna_species <- tax_table(fun_physeq) %>%
+  as.data.frame() %>%
+  dplyr::select(name) %>%
+  distinct() %>%
+  mutate(name = gsub(" NA", "", name))
+```
+
+```{r pltuvarum, fig.height=2.75, fig.width = 7}
+fun_physeq_uvarum <- aggregate_top_taxa(fun_physeq, level = "name", top = 1)
+fun_physeq_uvarum_rel <- microbiome::transform(fun_physeq_uvarum, "compositional")
+fun_physeq_uvarum_rel <- merge_samples(fun_physeq_uvarum_rel, group = "year_ava")
+sample_data(fun_physeq_uvarum_rel)$ava_id <- gsub("201[679]_", "", rownames(sample_data(fun_physeq_uvarum_rel)))
+sample_data(fun_physeq_uvarum_rel)$ava <- gsub("[123]", "", sample_data(fun_physeq_uvarum_rel)$ava_id)
+sample_data(fun_physeq_uvarum_rel)$ava <- factor(sample_data(fun_physeq_uvarum_rel)$ava, 
+                                                 levels = c("OR", "AV", "SNC", "RRV", "CRN", "AS", "SMV", "SRH"))
+sample_data(fun_physeq_uvarum_rel)$ava_id <- factor(sample_data(fun_physeq_uvarum_rel)$ava_id, 
+                                                    levels = c("OR1", "OR2", "AV1", 
+                                                               "AV2", "SNC1", "SNC2", 
+                                                               "RRV1",  "RRV2", "RRV3", 
+                                                               "CRN1", "AS1", "AS2", 
+                                                               "SMV1", "SMV2", "SRH1"))
+uvarum_composition <- plot_composition(fun_physeq_uvarum_rel, x.label = "ava_id", 
+                                       group_by = "year", sample.sort = "ava_id") + 
+  guides(fill = guide_legend(label.theme = element_text(size = 10, face = "italic", colour = "Black", angle = 0))) + 
+  labs(y = "relative abundance") +
+  theme_bw() + 
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90),
+        axis.title.x = element_blank(),
+        legend.title = element_text(size=12, face = "bold"),
+        strip.text.x = element_text(size = 12, face = "bold"),
+        strip.background = element_blank(),
+        panel.background = element_blank(), 
+        panel.grid =  element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2)) +
+  scale_fill_manual(values = c(newblack, "#e2e2e2"), name = "species") +
+  scale_y_continuous(breaks = c(0, 1, 2, 3, 4),
+                     labels = c('0', "0.25", "0.50", '0.75', '1.00'))
+
+fun_physeq_uvarum_rel2 <- microbiome::transform(fun_physeq_uvarum, "compositional")
+
+asv_uvarum <- otu_table(fun_physeq_uvarum_rel2) %>%
+  as.data.frame() %>%
+  t() %>%
+  as.data.frame() %>%
+  select(-Other) %>%
+  rownames_to_column("micro_id") %>%
+  filter(!grepl("^16", micro_id))
+
+rna_uvarum <- counts %>%
+  filter(organism == "Hanseniaspora uvarum") %>%
+  group_by(ts_sum_id, micro_id) %>%
+  summarize(rna_h_uvarum = sum(count))
+uvarum <- left_join(rna_uvarum, asv_uvarum, by = c("micro_id"))
+
+lm_uvarum <- lm(uvarum$`Hanseniaspora uvarum` ~ uvarum$rna_h_uvarum)
+#summary(lm_uvarum)
+lm_plt_uvarum <- ggplot(uvarum, aes(x = `Hanseniaspora uvarum`, y = rna_h_uvarum)) +
+  geom_point(alpha = 0.75) +
+  labs(x = "DNA relative abundance", y = "RNA relative abundance") +
+  theme_bw() + 
+  theme(legend.position = "bottom",
+        axis.title = element_text(size = 9),
+        axis.text.x = element_text(angle = 90),
+        legend.title = element_text(size=12),
+        strip.text.x = element_text(size = 12, face = "bold"),
+        strip.background = element_blank(),
+        panel.background = element_blank(), 
+        panel.grid =  element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2)) 
+
+ggarrange(uvarum_composition, lm_plt_uvarum, labels = c(" ", " "),widths = c(2.2, 1))
+```
+
+```{r 2hr}
+info2hr <- read_csv("samples_ava.csv") %>%
+  filter(!is.na(tank)) %>%
+  filter(hr == 2) %>%
+  filter(!is.na(micro_id)) %>%
+  dplyr::select(id, year, tank, ava_id, micro_id)
+
+## 2019
+v19 <- read_tsv("rna_seq/v2019/outputs/counts_all_organisms/raw_counts.tsv") %>%
+  filter(!gene %in% c("__no_feature", "__ambiguous", "__too_low_aQual", "__not_aligned", "__alignment_not_unique"))
+colnames(v19) <- gsub("outputs\\/htseq_all_organisms\\/", "", colnames(v19))
+colnames(v19) <- gsub("_readcounts\\.txt", "", colnames(v19))
+v19 <- dplyr::select(v19, c(colnames(v19)[colnames(v19) %in% info2hr$id], gene))
+v19 <- v19[rowSums(v19[-which(names(v19) %in% "gene")]) > 0, ] # remove rows that sum to zero
+v19 <- v19 %>%
+  mutate_at(vars(-gene), funs(./sum(.))) # divide by total number reads -- eg make relative
+v19 <- pivot_longer(v19, cols = -gene, names_to = 'id', values_to = 'count')
+v19 <- left_join(v19, info2hr, by = "id")
+
+v19 <- v19 %>%
+  mutate(organism = gsub("_.*", "", gene)) %>%
+  mutate(organism = gsub("KLTH0.*", "KLTH0", organism)) %>%
+  mutate(organism = gsub("PEGC.*", "PEGC", organism)) %>%
+  mutate(organism = gsub("MWSF.*", "MWSF", organism)) %>%
+  mutate(organism = gsub("^Y.*", "scer", organism)) %>%
+  mutate(organism = gsub("sn.*", "scer", organism)) %>%
+  mutate(organism = gsub("LPNK.*", "LPNK", organism)) %>%
+  mutate(organism = gsub("^t.*", "scer", organism)) %>%
+  mutate(organism = gsub("RPR1", "scer", organism)) %>%
+  mutate(organism = gsub("SCR1", "scer", organism)) %>%
+  mutate(organism = gsub("TLC1", "scer", organism)) %>%
+  mutate(organism = gsub("LSR1", "scer", organism)) %>%
+  mutate(organism = gsub("PWR1", "scer", organism)) %>%
+  mutate(organism = gsub("NME1", "scer", organism)) %>%
+  mutate(organism = gsub("ICR1", "scer", organism)) %>%
+  mutate(organism = gsub("RUF23", "scer", organism)) %>%
+  mutate(organism = gsub("RNA170", "scer", organism)) %>%
+  mutate(organism = gsub("ZOD1", "scer", organism)) %>%
+  mutate(organism = gsub("IRT1", "scer", organism)) %>%
+  mutate(organism = gsub("RUF20", "scer", organism)) %>%
+  mutate(organism = gsub("RUF21", "scer", organism)) %>%
+  mutate(organism = gsub("RUF22", "scer", organism)) %>%
+  mutate(organism = gsub("RUF5-2", "scer", organism)) %>%
+  mutate(organism = gsub("SRG1", "scer", organism)) %>%
+  mutate(organism = gsub("RME2", "scer", organism)) %>%
+  mutate(organism = gsub("RME3", "scer", organism)) %>%
+  mutate(organism = gsub("RDN5-1", "scer", organism)) %>%
+  mutate(organism = gsub("RDN37-2", "scer", organism)) %>%
+  mutate(organism = gsub("HRA1", "scer", organism)) %>%
+  mutate(organism = gsub("KLTH0", "Lachancea thermotolerans", organism)) %>%
+  mutate(organism = gsub("PEGC", "Cladosporium sp. SL-16", organism)) %>%
+  mutate(organism = gsub("MWSF", "Starmerella bacillaris", organism)) %>%
+  mutate(organism = gsub("LPNK", "Metschnikowia sp. AWRI3582", organism)) %>%
+  mutate(organism = gsub("scer", "Saccharomyces cerevisiae", organism)) %>%
+  mutate(organism = gsub("BCIN", "Botrytis cinerea", organism)) %>%
+  mutate(organism = gsub("BcDW1", "Botrytis cinerea", organism)) %>%
+  mutate(organism = gsub("VIT", "Vitis vinifera", organism)) %>%
+  mutate(organism = gsub("CU098", "Rhizopus stolonifer", organism)) %>%
+  mutate(organism = gsub("metfru2", "Metschnikowia fructicola", organism)) %>%
+  mutate(organism = gsub("M438DRAFT", "Aureobasidium pullulans", organism)) %>%
+  mutate(organism = gsub("AWRI3578", "Hanseniaspora opuntiae", organism)) %>%
+  mutate(organism = gsub("C5L36", "Pichia kudriavzevii", organism)) %>%
+  mutate(organism = gsub("D499", "Hanseniaspora uvarum", organism)) %>%
+  mutate(organism = gsub("D6D18", "Aureobasidium pullulans", organism))
+```
+
+```{r dnainrna2hr}
+rna_uvarum_2hr <- v19 %>%
+  filter(organism == "Hanseniaspora uvarum") %>%
+  group_by(micro_id) %>%
+  summarize(rna_h_uvarum = sum(count)) 
+uvarum2hr <- left_join(rna_uvarum_2hr, asv_uvarum, by = c("micro_id"))
+
+lm_uvarum2hr <- lm(uvarum2hr$`Hanseniaspora uvarum` ~ uvarum2hr$rna_h_uvarum)
+# summary(lm_uvarum2hr)
+# lm_plt_uvarum2hr <- ggplot(uvarum2hr, aes(x = `Hanseniaspora uvarum`, y = rna_h_uvarum)) +
+#   geom_point() +
+#   labs(x = "Relative abundance in DNA", y = "Relative abundance in RNA") +
+#   theme_minimal()
+
+fun_physeq_species <- aggregate_top_taxa(fun_physeq, level =  "name", top = 100)
+fun_physeq_species_rel <- transform(fun_physeq_species, "compositional")
+asv_apul <- otu_table(fun_physeq_species_rel) %>%
+  as.data.frame() %>%
+  t() %>%
+  as.data.frame() %>%
+  select(-Other) %>%
+  rownames_to_column("micro_id") %>%
+  filter(grepl("19", micro_id)) %>%
+  select(micro_id, "Aureobasidium pullulans")
+
+rna_apul_2hr <- v19 %>%
+  filter(organism == "Aureobasidium pullulans") %>%
+  group_by(micro_id) %>%
+  summarize(rna_apul = sum(count)) 
+apul2hr <- left_join(rna_apul_2hr, asv_apul, by = c("micro_id"))
+lm_apul2hr <- lm(apul2hr$`Aureobasidium pullulans` ~ apul2hr$rna_apul)
+#summary(lm_apul2hr)
+```
+
+```{r 6hr}
+info6hr <- read_csv("samples_ava.csv") %>%
+  filter(!is.na(tank)) %>%
+  filter(hr == 6) %>%
+  filter(!is.na(micro_id)) %>%
+  dplyr::select(id, year, tank, ava_id, micro_id)
+
+## 2019
+v19 <- read_tsv("rna_seq/v2019/outputs/counts_all_organisms/raw_counts.tsv") %>%
+  filter(!gene %in% c("__no_feature", "__ambiguous", "__too_low_aQual", "__not_aligned", "__alignment_not_unique"))
+colnames(v19) <- gsub("outputs\\/htseq_all_organisms\\/", "", colnames(v19))
+colnames(v19) <- gsub("_readcounts\\.txt", "", colnames(v19))
+v19 <- dplyr::select(v19, c(colnames(v19)[colnames(v19) %in% info6hr$id], gene))
+v19 <- v19[rowSums(v19[-which(names(v19) %in% "gene")]) > 0, ] # remove rows that sum to zero
+v19 <- v19 %>%
+  mutate_at(vars(-gene), funs(./sum(.))) # divide by total number reads -- eg make relative
+v19 <- pivot_longer(v19, cols = -gene, names_to = 'id', values_to = 'count')
+v19 <- left_join(v19, info6hr, by = "id")
+
+v19 <- v19 %>%
+  mutate(organism = gsub("_.*", "", gene)) %>%
+  mutate(organism = gsub("KLTH0.*", "KLTH0", organism)) %>%
+  mutate(organism = gsub("PEGC.*", "PEGC", organism)) %>%
+  mutate(organism = gsub("MWSF.*", "MWSF", organism)) %>%
+  mutate(organism = gsub("^Y.*", "scer", organism)) %>%
+  mutate(organism = gsub("sn.*", "scer", organism)) %>%
+  mutate(organism = gsub("LPNK.*", "LPNK", organism)) %>%
+  mutate(organism = gsub("^t.*", "scer", organism)) %>%
+  mutate(organism = gsub("RPR1", "scer", organism)) %>%
+  mutate(organism = gsub("SCR1", "scer", organism)) %>%
+  mutate(organism = gsub("TLC1", "scer", organism)) %>%
+  mutate(organism = gsub("LSR1", "scer", organism)) %>%
+  mutate(organism = gsub("PWR1", "scer", organism)) %>%
+  mutate(organism = gsub("NME1", "scer", organism)) %>%
+  mutate(organism = gsub("ICR1", "scer", organism)) %>%
+  mutate(organism = gsub("RUF23", "scer", organism)) %>%
+  mutate(organism = gsub("RNA170", "scer", organism)) %>%
+  mutate(organism = gsub("ZOD1", "scer", organism)) %>%
+  mutate(organism = gsub("IRT1", "scer", organism)) %>%
+  mutate(organism = gsub("RUF20", "scer", organism)) %>%
+  mutate(organism = gsub("RUF21", "scer", organism)) %>%
+  mutate(organism = gsub("RUF22", "scer", organism)) %>%
+  mutate(organism = gsub("RUF5-2", "scer", organism)) %>%
+  mutate(organism = gsub("SRG1", "scer", organism)) %>%
+  mutate(organism = gsub("RME2", "scer", organism)) %>%
+  mutate(organism = gsub("RME3", "scer", organism)) %>%
+  mutate(organism = gsub("RDN5-1", "scer", organism)) %>%
+  mutate(organism = gsub("RDN37-2", "scer", organism)) %>%
+  mutate(organism = gsub("HRA1", "scer", organism)) %>%
+  mutate(organism = gsub("KLTH0", "Lachancea thermotolerans", organism)) %>%
+  mutate(organism = gsub("PEGC", "Cladosporium sp. SL-16", organism)) %>%
+  mutate(organism = gsub("MWSF", "Starmerella bacillaris", organism)) %>%
+  mutate(organism = gsub("LPNK", "Metschnikowia sp. AWRI3582", organism)) %>%
+  mutate(organism = gsub("scer", "Saccharomyces cerevisiae", organism)) %>%
+  mutate(organism = gsub("BCIN", "Botrytis cinerea", organism)) %>%
+  mutate(organism = gsub("BcDW1", "Botrytis cinerea", organism)) %>%
+  mutate(organism = gsub("VIT", "Vitis vinifera", organism)) %>%
+  mutate(organism = gsub("CU098", "Rhizopus stolonifer", organism)) %>%
+  mutate(organism = gsub("metfru2", "Metschnikowia fructicola", organism)) %>%
+  mutate(organism = gsub("M438DRAFT", "Aureobasidium pullulans", organism)) %>%
+  mutate(organism = gsub("AWRI3578", "Hanseniaspora opuntiae", organism)) %>%
+  mutate(organism = gsub("C5L36", "Pichia kudriavzevii", organism)) %>%
+  mutate(organism = gsub("D499", "Hanseniaspora uvarum", organism)) %>%
+  mutate(organism = gsub("D6D18", "Aureobasidium pullulans", organism))
+```
+
+```{r dnainrna6hr}
+rna_uvarum_6hr <- v19 %>%
+  filter(organism == "Hanseniaspora uvarum") %>%
+  group_by(micro_id) %>%
+  summarize(rna_h_uvarum = sum(count)) 
+uvarum6hr <- left_join(rna_uvarum_6hr, asv_uvarum, by = c("micro_id"))
+
+lm_uvarum6hr <- lm(uvarum6hr$`Hanseniaspora uvarum` ~ uvarum6hr$rna_h_uvarum)
+# summary(lm_uvarum6hr)
+# lm_plt_uvarum6hr <- ggplot(uvarum6hr, aes(x = `Hanseniaspora uvarum`, y = rna_h_uvarum)) +
+#   geom_point() +
+#   labs(x = "Relative abundance in DNA", y = "Relative abundance in RNA") +
+#   theme_minimal()
+
+fun_physeq_species <- aggregate_top_taxa(fun_physeq, level =  "name", top = 100)
+fun_physeq_species_rel <- transform(fun_physeq_species, "compositional")
+asv_apul <- otu_table(fun_physeq_species_rel) %>%
+  as.data.frame() %>%
+  t() %>%
+  as.data.frame() %>%
+  select(-Other) %>%
+  rownames_to_column("micro_id") %>%
+  filter(grepl("19", micro_id)) %>%
+  select(micro_id, "Aureobasidium pullulans")
+
+rna_apul_6hr <- v19 %>%
+  filter(organism == "Aureobasidium pullulans") %>%
+  group_by(micro_id) %>%
+  summarize(rna_apul = sum(count)) 
+apul6hr <- left_join(rna_apul_6hr, asv_apul, by = c("micro_id"))
+lm_apul6hr <- lm(apul6hr$`Aureobasidium pullulans` ~ apul6hr$rna_apul)
+# summary(lm_apul6hr)
+```
+
+## Genetic signatures differentiate vineyard site, region, and vintage 
+
+### ANOSIM & NMDS
+
+```{r import_for_nmds_and_anosim}
+# ANOSIM compares within a dataframe (groups within bacterial samples; groups
+# within fungal samples; groups within transcriptome samples), so all samples 
+# can be included.
+
+#  metadata
+info_micro <- read_csv("samples_micro.csv") 
+info_micro$ava <- factor(info_micro$ava, levels = c("OR", "AV", "SNC", "RRV", "CRN", "AS", "SMV", "SRH"))
+info_micro$ava_id <- factor(info_micro$ava_id, levels = c("OR1", "OR2", "AV1", "AV2", "SNC1", 
+                                                          "SNC2", "RRV1", "RRV2", "RRV3", "CRN1", 
+                                                          "AS1", "AS2", "SMV1", "SMV2", "SRH1"))
+
+info <- read_csv("samples_ava.csv") %>%
+  select(ts_sum_id, micro_id, year, tank, ava_id, ava) %>%
+  filter(!is.na(ts_sum_id)) %>%
+  distinct()
+
+info$ava <- factor(info$ava, levels = c("OR", "AV", "SNC", "RRV", "CRN", "AS", "SMV", "SRH"))
+info$ava_id <- factor(info$ava_id, levels = c("OR1", "OR2", "AV1", "AV2", "SNC1", 
+                                              "SNC2", "RRV1", "RRV2", "RRV3", "CRN1", 
+                                              "AS1", "AS2", "SMV1", "SMV2", "SRH1"))
+
+# all bacterial abundance DF
+bac_dada <- read_tsv("../pn_amp/2019/outputs/16s/dada2/ASV_counts.tsv") %>%
+  filter(!X1 %in% bac_tax_contam$X1) %>%                       # remove cholorplast and mitochondria
+  as.data.frame() %>%                                          # read in DF
+  column_to_rownames("X1")
+bac_dada <- t(bac_dada)                                        # transpose to same form as metadata
+bac_dada <- bac_dada[which(rownames(bac_dada) %in% info_micro$micro_id), ] # filt to bac dada w metadata
+bac_dada <- bac_dada[match(info_micro$micro_id, rownames(bac_dada)), ] # order bac_dada same as info_micro
+bac_dada <- transform(bac_dada, "clr") # transform for CoDa
+
+# all fungal abundance DF
+fun_dada <- read_tsv("../pn_amp/2019/outputs/ITS/dada2/ASV_counts.tsv") %>%
+  as.data.frame() %>%                                          # read in DF
+  column_to_rownames("X1")
+fun_dada <- t(fun_dada)                                        # transpose to same form as metadata
+fun_dada <- fun_dada[which(rownames(fun_dada) %in% info_micro$micro_id), ] # filt to fun dada w metadata
+fun_dada <- fun_dada[match(info_micro$micro_id, rownames(fun_dada)), ] # order fun_dada same as info_micro
+fun_dada <- transform(fun_dada, "clr") # transform for CoDa
+
+# all transcriptome samples
+summarized_counts <- readRDS("rna_seq/site/summarized_counts.RDS") %>%
+  as.data.frame() %>%
+  column_to_rownames("ts_sum_id")
+summarized_counts <- summarized_counts[which(rownames(summarized_counts) %in% info$ts_sum_id), ] # filt to samples w metadata
+summarized_counts <- summarized_counts[match(info$ts_sum_id, rownames(summarized_counts)), ] # order summarized_counts same as info
+summarized_counts <- transform(summarized_counts, "clr") # transform for CoDa
+```
+
+```{r nmds, fig.height = 2.5}
+nmds_bac <- metaMDS(bac_dada, distance = "euclidean", trace = F)
+data_scores_bac <- as.data.frame(scores(nmds_bac))
+data_scores_bac$micro_id <- rownames(data_scores_bac)
+data_scores_bac <- left_join(data_scores_bac, info_micro)
+
+nmds_bac_plt <- ggplot(data_scores_bac, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(size = 2, aes(shape = as.character(year), colour = ava))+ 
+  theme(axis.text.y = element_blank(), 
+        axis.text.x = element_blank(), 
+        axis.title.y = element_text(size = 10, color = "black"), 
+        legend.title = element_text(size = 10, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 9, colour = "black"), 
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank()) + 
+  labs(x = "NMDS1", colour = "AVA", y = "NMDS2", shape = "Vintage") +
+  scale_color_manual(values = c(SRH = srh, SMV = smv, AS = as, SNC = snc, CRN = crn, 
+                                RRV = rrv, AV = av, OR = or))
+
+
+nmds_fun <- metaMDS(fun_dada, distance = "euclidean", trace = F)
+data_scores_fun <- as.data.frame(scores(nmds_fun))
+data_scores_fun$micro_id <- rownames(data_scores_fun)
+data_scores_fun <- left_join(data_scores_fun, info_micro)
+
+nmds_fun_plt <- ggplot(data_scores_fun, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(size = 2, aes(shape = as.character(year), colour = ava))+ 
+  theme(axis.text.y = element_blank(), 
+        axis.text.x = element_blank(), 
+        legend.text = element_text(size = 9, colour ="black"), 
+        axis.title.y = element_text(),
+        axis.title.x = element_text(size = 10, colour = "black"), 
+        legend.title = element_text(size = 10, colour = "black", face = "bold"), 
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank()) +
+  labs(x = "NMDS1", y = "", colour = "AVA", shape = "Vintage") +
+  scale_color_manual(values = c(SRH = srh, SMV = smv, AS = as, SNC = snc, CRN = crn, 
+                                RRV = rrv, AV = av, OR = or))
+
+nmds_trans <- metaMDS(summarized_counts, distance = "euclidean", trace = F)
+data_scores_trans <- as.data.frame(scores(nmds_trans))
+data_scores_trans$ts_sum_id <- rownames(data_scores_trans)
+data_scores_trans <- left_join(data_scores_trans, info)
+
+nmds_trans_plt <- ggplot(data_scores_trans, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(size = 2, aes(shape = as.character(year), colour = ava))+ 
+  theme(axis.text.y = element_blank(), 
+        axis.text.x = element_blank(), 
+        axis.title.y = element_text(), 
+        legend.title = element_text(size = 12, colour = "black", face = "bold"),
+        legend.text = element_text(size = 9, colour = "black"), 
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank()) +
+  labs(x = "NMDS1", y = "", colour = "AVA", shape = "Vintage") +
+  scale_color_manual(values = c(SRH = srh, SMV = smv, AS = as, SNC = snc, CRN = crn, 
+                                RRV = rrv, AV = av, OR = or)) +
+  scale_shape_manual(values = c("2017" = 17, "2019" = 15))
+
+
+ggarrange(nmds_bac_plt, nmds_fun_plt, nmds_trans_plt, labels = c("", "", ""), 
+          ncol = 3, nrow = 1, common.legend = T, legend = "bottom")
+```
+
+```{r anosim}
+ano_bac_year <- anosim(bac_dada, info_micro$year, distance = "euclidean", permutations = 9999)
+ano_bac_ava <- anosim(bac_dada, info_micro$ava, distance = "euclidean", permutations = 9999)
+ano_bac_site <- anosim(bac_dada, info_micro$ava_id, distance = "euclidean", permutations = 9999)
+ano_fun_year <- anosim(fun_dada, info_micro$year, distance = "euclidean", permutations = 9999)
+ano_fun_ava <- anosim(fun_dada, info_micro$ava, distance = "euclidean", permutations = 9999)
+ano_fun_site <- anosim(fun_dada, info_micro$ava_id, distance = "euclidean", permutations = 9999)
+ano_trans_year <- anosim(summarized_counts, info$year, distance = "euclidean", permutations = 9999)
+ano_trans_ava <- anosim(summarized_counts, info$ava, distance = "euclidean", permutations = 9999)
+ano_trans_site <- anosim(summarized_counts, info$ava_id, distance = "euclidean", permutations = 9999)
+
+anosim_results <- data.frame(data = c("bacteria", "bacteria", "bacteria", 
+                                      "fungi", "fungi", "fungi", 
+                                      "transcriptome", "transcriptome", "transcriptome"),
+                             variable = c("vintage", "region", "site", 
+                                          "vintage", "region", "site", 
+                                          "vintage", "region", "site"),
+                             R = c(ano_bac_year$statistic, ano_bac_ava$statistic, 
+                                   ano_bac_site$statistic, ano_fun_year$statistic, 
+                                   ano_fun_ava$statistic, ano_fun_site$statistic,
+                                   ano_trans_year$statistic, ano_trans_ava$statistic, 
+                                   ano_trans_site$statistic),
+                             p = c(ano_bac_year$signif, ano_bac_ava$signif, ano_bac_site$signif,
+                                   ano_fun_year$signif, ano_fun_ava$signif, ano_fun_site$signif,
+                                   ano_trans_year$signif, ano_trans_ava$signif, 
+                                   ano_trans_site$signif))
+anosim_results$R <- round(anosim_results$R, digits = 2)
+
+ggtexttable(anosim_results, rows = NULL, theme = ttheme("light"))
+
+kable(anosim_results, "latex", booktabs = T, linesep ="", caption = 'Drives of dissimilarity among fermentations. R and pvalues represent results of ANOSIM tests.', digits = 2) %>%
+  kable_styling(font_size = 9, latex_options ="striped", stripe_index =c(1:3, 7:9))
+```
+
+### Random forests
+
+```{r preprocess_df_function}
+preprocess_df <- function(df){
+  # isolate gene name from min/max/mean etc
+  df$gene <- gsub("_max", "", df$gene)
+  df$gene <- gsub("_min", "", df$gene)
+  df$gene <- gsub("_mean", "", df$gene)
+  df$gene <- gsub("_raw", "", df$gene)
+  df$gene <- gsub("_deviation", "", df$gene)
+  
+  # use gene names to get organism gene came from
+  df$org <- gsub("_.*", "", df$gene)
+  df$org <- gsub("KLTH0.*", "KLTH0", df$org)
+  df$org <- gsub("PEGC.*", "PEGC", df$org)
+  df$org <- gsub("MWSF.*", "MWSF", df$org)
+  df$org <- gsub("^Y.*", "scer", df$org)
+  df$org <- gsub("sn.*", "scer", df$org)
+  df$org <- gsub("LPNK.*", "LPNK", df$org)
+  df$org <- gsub("^t.*", "scer", df$org)
+  df$org <- gsub("RPR1", "scer", df$org)
+  df$org <- gsub("SCR1", "scer", df$org)
+  df$org <- gsub("TLC1", "scer", df$org)
+  df$org <- gsub("LSR1", "scer", df$org)
+  df$org <- gsub("PWR1", "scer", df$org)
+  df$org <- gsub("NME1", "scer", df$org)
+  df$org <- gsub("ICR1", "scer", df$org)
+  df$org <- gsub("IRT1", "scer", df$org)
+  df$org <- gsub("RUF23", "scer", df$org)
+  df$org <- gsub("RUF22", "scer", df$org)
+  df$org <- gsub("ZOD1", "scer", df$org)
+  df$org <- gsub("RNA170", "scer", df$org)
+  df$org <- gsub("HRA1", "scer", df$org)
+  
+  # switch org from genome prefix to species name
+  # use gene names to get organism gene came from
+  df$org <- gsub("KLTH0", "Lachancea thermotolerans", df$org)
+  df$org <- gsub("PEGC", "Cladosporium sp. SL-16", df$org)
+  df$org <- gsub("MWSF", "Starmerella bacillaris", df$org)
+  df$org <- gsub("LPNK", "Metschnikowia sp. AWRI3582", df$org)
+  df$org <- gsub("scer", "Saccharomyces cerevisiae", df$org)
+  df$org <- gsub("BCIN", "Botrytis cinerea", df$org)
+  df$org <- gsub("BcDW1", "Botrytis cinerea", df$org)
+  df$org <- gsub("VIT", "Vitis vinifera", df$org)
+  df$org <- gsub("CU098", "Rhizopus stolonifer", df$org)
+  df$org <- gsub("metfru2", "Metschnikowia fructicola", df$org)
+  df$org <- gsub("M438DRAFT", "Aureobasidium pullulans", df$org)
+  df$org <- gsub("AWRI3578", "Hanseniaspora opuntiae", df$org)
+  df$org <- gsub("C5L36", "Pichia kudriavzevii", df$org)
+  df$org <- gsub("D499", "Hanseniaspora uvarum", df$org)
+  df$org <- gsub("D6D18", "Aureobasidium pullulans", df$org)
+  return(df)
+}
+
+```
+
+```{r model_percentages, eval = F}
+# calculate percent of vars held by each organism
+perc_vars_per_org <- function(optimal_rf_rds){
+  tmp <- readRDS(optimal_rf_rds)$variable.importance 
+  # filter to variable importance > 0
+  df <- data.frame(gene = names(tmp), imp = tmp) %>%
+    filter(imp > 0) %>%
+    arrange(desc(imp))
+  
+  df <- preprocess_df(df)
+  
+  # summarize to percent of variables held by each organism
+  df %>% 
+    group_by(org) %>% 
+    tally() %>%
+    mutate(per=paste0(round(n/sum(n)*100, 1), "%")) %>% 
+    ungroup()
+}
+
+perc_17_site <- perc_vars_per_org("rna_seq/site/site_2017train_optimal_rf.RDS")
+perc_19_site <- perc_vars_per_org("rna_seq/site/site_train70_optimal_rf.RDS")
+perc_all_site <- perc_vars_per_org("rna_seq/site/site_train70_optimal_rf.RDS")
+perc_17_ava <- perc_vars_per_org("rna_seq/avas/ava_train2017_optimal_rf.RDS")
+perc_19_ava <-  perc_vars_per_org("rna_seq/avas/ava_train2019_optimal_rf.RDS")
+perc_all_ava <- perc_vars_per_org("rna_seq/avas/ava_train70_optimal_rf.RDS")
+
+perc_all <- data.frame(organism = perc_17_site$org, 
+                       site17 = perc_17_site$per, site19 = perc_19_site$per, 
+                       site_all = perc_all_site$per, ava17 = perc_17_ava$per, 
+                       ava19 = perc_19_ava$per, ava_all = perc_all_ava$per)  
+
+ggtexttable(perc_all, rows = NULL, theme = ttheme("light"))
+
+kable(perc_all, "latex", booktabs = T, digits = 1,
+      caption = 'Percent of genes with variable importance greater than zero belonging to each organism in each model.') %>%
+  kable_styling(font_size = 9) %>%
+  add_header_above(c(" " = 1, "model" = 6), align = "c", escape = F)
+```
+
+```{r varimppercentages, fig.height = 3.5, fig.width = 4.2}
+perc_imp_per_org <- function(optimal_rf_rds){
+  tmp <- readRDS(optimal_rf_rds)$variable.importance 
+  # filter to variable importance > 0
+  df <- data.frame(gene = names(tmp), imp = tmp) %>%
+    filter(imp > 0) %>%
+    arrange(desc(imp))
+  
+  df <- preprocess_df(df)
+  
+  # summarize to percent of variables held by each organism
+  df <- df %>% 
+    group_by(org) %>% 
+    mutate(total_imp = sum(imp)) %>%
+    ungroup() %>%
+    select(org, total_imp) %>%
+    distinct()
+  df <- df %>%
+    mutate(per= total_imp/sum(total_imp) * 100) 
+  stopifnot(all.equal(sum(df$per), 100))
+  df <- df %>% 
+    arrange(org) %>%
+    mutate(per = paste0(round(per, digits = 1), "%")) %>%
+    select(-total_imp)
+  return(df)
+}
+
+perc_imp_17_site <- perc_imp_per_org("rna_seq/site/site_2017train_optimal_rf.RDS")
+perc_imp_19_site <- perc_imp_per_org("rna_seq/site/site_2019train_optimal_rf.RDS")
+perc_imp_all_site <- perc_imp_per_org("rna_seq/site/site_train70_optimal_rf.RDS")
+perc_imp_17_ava <- perc_imp_per_org("rna_seq/avas/ava_train2017_optimal_rf.RDS")
+perc_imp_19_ava <-  perc_imp_per_org("rna_seq/avas/ava_train2019_optimal_rf.RDS")
+perc_imp_all_ava <- perc_imp_per_org("rna_seq/avas/ava_train70_optimal_rf.RDS")
+
+perc_imp_all <- data.frame(org = perc_imp_17_site$org, 
+                       site17 = perc_imp_17_site$per, site19 = perc_imp_19_site$per, 
+                       site_all = perc_imp_all_site$per, ava17 = perc_imp_17_ava$per, 
+                       ava19 = perc_imp_19_ava$per, ava_all = perc_imp_all_ava$per)  
+
+perc_imp_all_long <- perc_imp_all %>%
+  pivot_longer(cols = -org, names_to = "model", values_to = "percent") %>%
+  mutate(percent = as.numeric(gsub("%", "", percent)))
+
+ggplot(perc_imp_all_long, aes(x = model, y = percent, fill = org)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 9),
+        axis.text.y = element_text(colour = "black", size = 9), 
+        legend.title = element_text(size = 11, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 7, color = "black", face = "italic"),
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank(),
+        plot.title = element_text(hjust=0.5)) +
+  scale_fill_manual(name = "species", values = c("Hanseniaspora uvarum" = newblack, "Metschnikowia fructicola" = mauve,
+                               "Metschnikowia sp. AWRI3582" = "pink",
+                               "Saccharomyces cerevisiae" = white_rock, "Starmerella bacillaris" = aqua, 
+                               "Vitis vinifera" = purple, "Cladosporium sp. SL-16" = "khaki",
+                               "Aureobasidium pullulans" = brown_grey, "Aureobasidium sp. FSWF8-4" = red,
+                               "Botryotinia fuckeliana" = grey, "Botrytis cinerea" = cyan, 
+                               "Hanseniaspora opuntiae" = selective_yellow, "Hanseniaspora vineae" = grey_yellow,
+                               "Lachancea thermotolerans" = mint,
+                               "Pichia kudriavzevii" = steel_blue, 
+                               "Preussia sp." = orange, "Rhizopus stolonifer" = viridian))
+
+# make a plot where non-saccharomyces organisms are single color
+perc_imp_all_long$org2 <- ifelse(perc_imp_all_long$org == "Saccharomyces cerevisiae", "Saccharomyces cerevisiae",
+                                 ifelse(perc_imp_all_long$org == "Vitis vinifera", "Vitis vinifera", "other"))
+
+ggplot(perc_imp_all_long, aes(x = model, y = percent, fill = org2)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 9),
+        axis.text.y = element_text(colour = "black", size = 9), 
+        legend.title = element_text(size = 11, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 7, color = "black", face = "italic"),
+        legend.position = "bottom",
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank(),
+        plot.title = element_text(hjust=0.5)) +
+  scale_fill_manual(name = "species", values = c("other" = brown_grey,     
+                                                 "Saccharomyces cerevisiae" = white_rock, 
+                                                 "Vitis vinifera" = purple))
+# kable(perc_imp_all, "latex", booktabs = T,
+#       caption = 'Percent of variable importance held by genes belonging to each organism in each model.') %>%
+#   kable_styling(font_size = 9) %>%
+#   add_header_above(c(" " = 1, "model" = 6), align = "c", escape = F)
+```
+
+```{r varimp_supp_tabs, eval = F}
+varimp_to_supp_tab <- function(rds){
+  tmp <- readRDS(rds)$variable.importance
+  df <- data.frame(gene = names(tmp), imp = tmp) %>%
+    filter(imp > 0) %>%
+    arrange(desc(imp))
+  df <- preprocess_df(df) %>%
+    rownames_to_column("identifier") %>%
+    mutate(permutation_variable_importance = imp) %>%
+    select(identifier, gene, permutation_variable_importance, organism = org)
+}
+
+varimp_rna_17_site <- varimp_to_supp_tab("rna_seq/site/site_2017train_optimal_rf.RDS")
+varimp_rna_19_site <- varimp_to_supp_tab("rna_seq/site/site_2019train_optimal_rf.RDS")
+varimp_rna_all_site <- varimp_to_supp_tab("rna_seq/site/site_train70_optimal_rf.RDS")
+varimp_rna_17_ava <- varimp_to_supp_tab("rna_seq/avas/ava_train2017_optimal_rf.RDS")
+varimp_rna_19_ava <-  varimp_to_supp_tab("rna_seq/avas/ava_train2019_optimal_rf.RDS")
+varimp_rna_all_ava <- varimp_to_supp_tab("rna_seq/avas/ava_train70_optimal_rf.RDS")
+
+write.xlsx(varimp_rna_17_site, file="supplementary_tables/table_S2_varimp.xlsx", sheetName="varimp_rna_train17_site", row.names=FALSE)
+write.xlsx(varimp_rna_19_site, file="supplementary_tables/table_S2_varimp.xlsx", sheetName="varimp_rna_train19_site", append=TRUE, row.names=FALSE)
+write.xlsx(varimp_rna_all_site, file="supplementary_tables/table_S2_varimp.xlsx", sheetName="varimp_rna_train70_site", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_rna_17_ava, file="supplementary_tables/table_S2_varimp.xlsx", sheetName="varimp_rna_train17_ava", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_rna_19_ava, file="supplementary_tables/table_S2_varimp.xlsx", sheetName="varimp_rna_train19_ava", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_rna_all_ava, file="supplementary_tables/table_S2b_varimp.xlsx", sheetName="varimp_rna_train70_ava", row.names=FALSE) 
+
+# bacteria ----------------------------------------------------------------
+
+varimp_to_supp_tab_asv <- function(rds, taxonomy){
+  tmp <- readRDS(rds)$variable.importance
+  df <- data.frame(ASV = names(tmp), permutation_variable_importance = tmp) %>%
+    filter(permutation_variable_importance > 0) %>%
+    arrange(desc(permutation_variable_importance))
+  taxonomy <- read_tsv(taxonomy)
+  df <- left_join(df, taxonomy, by = c("ASV" = "X1"))
+}
+
+varimp_bac_site_train1617 <- varimp_to_supp_tab_asv("amplicon/bac/optimal_rf_site_train1617.RDS",
+                                                    "~/github/pn_amp/2019/outputs/16s/dada2/ASV_taxonomy.tsv")
+varimp_bac_site_train1619 <- varimp_to_supp_tab_asv("amplicon/bac/optimal_rf_site_train1619.RDS",
+                                                    "~/github/pn_amp/2019/outputs/16s/dada2/ASV_taxonomy.tsv")
+varimp_bac_site_train1719 <- varimp_to_supp_tab_asv("amplicon/bac/optimal_rf_site_train1719.RDS",
+                                                    "~/github/pn_amp/2019/outputs/16s/dada2/ASV_taxonomy.tsv")
+varimp_bac_ava_train1617 <- varimp_to_supp_tab_asv("amplicon/bac/optimal_rf_ava_train1617.RDS",
+                                                   "~/github/pn_amp/2019/outputs/16s/dada2/ASV_taxonomy.tsv")
+varimp_bac_ava_train1619 <- varimp_to_supp_tab_asv("amplicon/bac/optimal_rf_ava_train1619.RDS",
+                                                   "~/github/pn_amp/2019/outputs/16s/dada2/ASV_taxonomy.tsv")
+varimp_bac_ava_train1719 <- varimp_to_supp_tab_asv("amplicon/bac/optimal_rf_ava_train1719.RDS",
+                                                   "~/github/pn_amp/2019/outputs/16s/dada2/ASV_taxonomy.tsv")
+
+# fungi -------------------------------------------------------------------
+
+varimp_fungi_site_train1617 <- varimp_to_supp_tab_asv("amplicon/fungi/optimal_rf_site_train1617.RDS",
+                                                      "~/github/pn_amp/2019/outputs/ITS/dada2/ASV_taxonomy.tsv")
+varimp_fungi_site_train1619 <- varimp_to_supp_tab_asv("amplicon/fungi/optimal_rf_site_train1619.RDS",
+                                                      "~/github/pn_amp/2019/outputs/ITS/dada2/ASV_taxonomy.tsv")
+varimp_fungi_site_train1719 <- varimp_to_supp_tab_asv("amplicon/fungi/optimal_rf_site_train1719.RDS",
+                                                      "~/github/pn_amp/2019/outputs/ITS/dada2/ASV_taxonomy.tsv")
+varimp_fungi_ava_train1617 <- varimp_to_supp_tab_asv("amplicon/fungi/optimal_rf_ava_train1617.RDS",
+                                                     "~/github/pn_amp/2019/outputs/ITS/dada2/ASV_taxonomy.tsv")
+varimp_fungi_ava_train1619 <- varimp_to_supp_tab_asv("amplicon/fungi/optimal_rf_ava_train1619.RDS",
+                                                     "~/github/pn_amp/2019/outputs/ITS/dada2/ASV_taxonomy.tsv")
+varimp_fungi_ava_train1719 <- varimp_to_supp_tab_asv("amplicon/fungi/optimal_rf_ava_train1719.RDS",
+                                                     "~/github/pn_amp/2019/outputs/ITS/dada2/ASV_taxonomy.tsv")
+
+
+write.xlsx(varimp_bac_site_train1617, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_bac_site_train1617", row.names=FALSE) 
+write.xlsx(varimp_bac_site_train1619, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_bac_site_train1619", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_bac_site_train1719, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_bac_site_train1719", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_bac_ava_train1617, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_bac_ava_train1617", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_bac_ava_train1619, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_bac_ava_train1619", append=TRUE, row.names=FALSE)
+write.xlsx(varimp_bac_ava_train1719, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_bac_ava_train1719", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_fungi_site_train1617, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_fungi_site_train1617", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_fungi_site_train1619, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_fungi_site_train1619", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_fungi_site_train1719, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_fungi_site_train1719", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_fungi_ava_train1617, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_fungi_ava_train1617", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_fungi_ava_train1619, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_fungi_ava_train1619", append=TRUE, row.names=FALSE) 
+write.xlsx(varimp_fungi_ava_train1719, file="supplementary_tables/table_S3_varimp.xlsx", sheetName="varimp_fungi_ava_train1719", append = TRUE, row.names=FALSE) 
+```
+
+
+### Mantel tests
+
+```{r mantel_data}
+# note this uses the RNA seq samples sheet to filter to "complete cases" -- e.g.
+# 2017 & 2019 samples
+#  metadata
+info <- read_csv("samples_ava.csv") %>%
+  filter(!is.na(tank)) %>%
+  dplyr::select(-wine_tube_id, -id, -nutristart, -dap, -initial_tso2, -brix, -hr) %>%
+  distinct() %>%
+  filter(!is.na(micro_id))
+info$ava <- factor(info$ava, levels = c("OR", "AV", "SNC", "RRV", "CRN", "AS", "SMV", "SRH"))
+
+# bacterial abundance DF
+bac_dada <- read_tsv("../pn_amp/2019/outputs/16s/dada2/ASV_counts.tsv") %>%
+  filter(!X1 %in% bac_tax_contam$X1) %>%                       # remove cholorplast and mitochondria
+  as.data.frame() %>%                                          # read in DF
+  column_to_rownames("X1")                                     # make samples rownames
+bac_dada <- t(bac_dada)                                        # transpose to same form as metadata
+bac_dada <- bac_dada[which(rownames(bac_dada) %in% info$micro_id), ] # filt to bac dada w metadata
+bac_dada <- bac_dada[match(info$micro_id, rownames(bac_dada)), ] # order bac_dada same as info
+bac_dada <- transform(bac_dada, "clr")
+
+# fungal abundance DF
+fun_dada <- read_tsv("../pn_amp/2019/outputs/ITS/dada2/ASV_counts.tsv") %>%
+  as.data.frame() %>%                                          # read in DF
+  column_to_rownames("X1")
+fun_dada <- t(fun_dada)                                        # transpose to same form as metadata
+fun_dada <- fun_dada[which(rownames(fun_dada) %in% info$micro_id), ] # filt to fun dada w metadata
+fun_dada <- fun_dada[match(info$micro_id, rownames(fun_dada)), ] # order fun_dada same as info
+fun_dada <- transform(fun_dada, "clr")
+
+# sig transcriptome abundance DF
+# use RF vita var sel 
+site_counts <- readRDS("rna_seq/site/summarized_counts.RDS") %>%
+  as.data.frame() %>%
+  column_to_rownames("ts_sum_id")
+site_counts <- site_counts[which(rownames(site_counts) %in% info$ts_sum_id), ] # filt to fun dada w metadata
+site_counts <- site_counts[match(info$ts_sum_id, rownames(site_counts)), ] # order site_counts same as info
+site_counts <- transform(site_counts, "clr")
+
+# initial wine param df 
+# note need to scale init wine param data before creating a distance matrix 
+# because the initial wine paramteres are measured using different metrics that 
+# are not comparable with each other.
+init_wine <- dplyr::select(info, initial_brix, initial_ph, initial_TA, initial_nopa, 
+                           initial_nh3, initial_yan, initial_MA)
+init_wine_scale <- scale(init_wine, center = TRUE, scale = TRUE) #scale data 
+
+# longitude and latitude data frame
+geo <- dplyr::select(info, lon, lat)
+
+# climate
+climate <- dplyr::select(info, total_ppt, total_gdd_f)
+climate_scale <- scale(climate, center = T, scale = T)
+```
+
+```{r mantel_dist}
+# subsets into distance matrices.
+dist_bac_abund <- vegdist(bac_dada, method = "euclidean")              # bac abund - Aitchison dissimilarity
+dist_fun_abund <- vegdist(fun_dada, method = "euclidean")              # fun abund - Aitchison dissimilarity
+dist_transcriptome_abund <- vegdist(site_counts, method = "euclidean") # transcriptome abund - Aitchison dissimilarity
+dist_init <- dist(init_wine_scale, method = "euclidean")               # init wine df - euclidean distance
+dist_init_brix <- dist(init_wine$initial_brix, method = "euclidean")   # brix - euclidean distance
+dist_init_ph <- dist(init_wine$initial_ph, method = "euclidean")       # ph - euclidean distance
+dist_init_ta <- dist(init_wine$initial_TA, method = "euclidean")       # titratable acidity - euclidean distance
+dist_init_ma <- dist(init_wine$initial_MA, method = "euclidean")       # malic acid - euclidean distance
+dist_init_nopa <- dist(init_wine$initial_nopa, method = "euclidean")   # nopa - euclidean distance
+dist_init_nh3 <- dist(init_wine$initial_nh3, method = "euclidean")     # nh3 - euclidean distance
+dist_init_yan <- dist(init_wine$initial_yan, method = "euclidean")     # yan - euclidean distance
+dist_geo <- as.dist(distm(geo, fun = distHaversine))                   # geographic data frame - haversine distance
+dist_gdd <- dist(info$total_gdd_c, method = "euclidean")               # growing degree days - euclidean distance
+dist_ppt <- dist(info$total_ppt, method = "euclidean")                 # precipitation - euclidean distance
+dist_clim <- dist(climate_scale, method = "euclidean")                 # scaled climate vars - euclidean distance
+```
+
+```{r mantel_tests}
+bac_abund_geo  <- mantel(dist_bac_abund, dist_geo, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs geographic 
+bac_abund_ma  <- mantel(dist_bac_abund, dist_init_ma, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs malic acid
+bac_abund_brix  <- mantel(dist_bac_abund, dist_init_brix, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs malic acid
+bac_abund_ph  <- mantel(dist_bac_abund, dist_init_ph, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs malic acid
+bac_abund_ta  <- mantel(dist_bac_abund, dist_init_ta, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs malic acid
+bac_abund_nopa  <- mantel(dist_bac_abund, dist_init_nopa, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs malic acid
+bac_abund_nh3  <- mantel(dist_bac_abund, dist_init_nh3, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs malic acid
+bac_abund_yan  <- mantel(dist_bac_abund, dist_init_yan, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs malic acid
+bac_abund_gdd <- mantel(dist_bac_abund, dist_gdd, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs growing degree days
+bac_abund_ppt <- mantel(dist_bac_abund, dist_ppt, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # bacterial abundance vs precipitation
+fun_abund_geo  <- mantel(dist_fun_abund, dist_geo, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # fungal abundance vs geographic 
+fun_abund_gdd <- mantel(dist_fun_abund, dist_gdd, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # fungal abundance vs growing degree days
+fun_abund_ppt <- mantel(dist_fun_abund, dist_ppt, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # fungal abundance vs precipitation
+fun_abund_bac_abund <- mantel(dist_bac_abund, dist_fun_abund, method = "spearman", 
+                              permutations = 9999, na.rm = TRUE) # bacterial abundance vs fungal abundance
+fun_abund_ma  <- mantel(dist_fun_abund, dist_init_ma, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # funterial abundance vs malic acid
+fun_abund_brix  <- mantel(dist_fun_abund, dist_init_brix, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # funterial abundance vs malic acid
+fun_abund_ph  <- mantel(dist_fun_abund, dist_init_ph, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # funterial abundance vs malic acid
+fun_abund_ta  <- mantel(dist_fun_abund, dist_init_ta, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # funterial abundance vs malic acid
+fun_abund_nopa  <- mantel(dist_fun_abund, dist_init_nopa, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # funterial abundance vs malic acid
+fun_abund_nh3  <- mantel(dist_fun_abund, dist_init_nh3, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # funterial abundance vs malic acid
+fun_abund_yan  <- mantel(dist_fun_abund, dist_init_yan, method = "spearman", 
+                         permutations = 9999, na.rm = TRUE) # funterial abundance vs malic acid
+fun_abund_transcriptome_abund <- mantel(dist_fun_abund, dist_transcriptome_abund, method = "spearman", 
+                                        permutations = 9999, na.rm = TRUE) # fungal abundance vs init wine
+transcriptome_abund_geo  <- mantel(dist_transcriptome_abund, dist_geo, method = "spearman", 
+                                   permutations = 9999, na.rm = TRUE) # fungal abundance vs geographic 
+transcriptome_abund_bac_abund <- mantel(dist_transcriptome_abund, dist_bac_abund, method = "spearman", 
+                                        permutations = 9999, na.rm = TRUE) # bacterial abundance vs fungal abundance
+transcriptome_abund_ph  <- mantel(dist_transcriptome_abund, dist_init_ph, method = "spearman", 
+                                   permutations = 9999, na.rm = TRUE) # fungal abundance vs geographic 
+transcriptome_abund_ta  <- mantel(dist_transcriptome_abund, dist_init_ta, method = "spearman", 
+                                   permutations = 9999, na.rm = TRUE) # fungal abundance vs geographic 
+transcriptome_abund_ma  <- mantel(dist_transcriptome_abund, dist_init_ma, method = "spearman", 
+                                   permutations = 9999, na.rm = TRUE) # fungal abundance vs geographic 
+transcriptome_abund_nopa  <- mantel(dist_transcriptome_abund, dist_init_nopa, method = "spearman", 
+                                   permutations = 9999, na.rm = TRUE) # fungal abundance vs geographic 
+transcriptome_abund_nh3  <- mantel(dist_transcriptome_abund, dist_init_nh3, method = "spearman", 
+                                   permutations = 9999, na.rm = TRUE) # fungal abundance vs geographic 
+transcriptome_abund_yan  <- mantel(dist_transcriptome_abund, dist_init_yan, method = "spearman", 
+                                   permutations = 9999, na.rm = TRUE) # fungal abundance vs yan
+transcriptome_abund_ppt  <- mantel(dist_transcriptome_abund, dist_ppt, method = "spearman", 
+                                   permutations = 9999, na.rm = TRUE) # transcriptome abundance vs ppt
+transcriptome_abund_gdd  <- mantel(dist_transcriptome_abund, dist_gdd, method = "spearman", 
+                                   permutations = 9999, na.rm = TRUE) # transcriptome abundance vs ppt
+ppt_geo <- mantel(dist_geo, dist_ppt, method = "spearman", permutations = 9999, na.rm = TRUE) 
+gdd_geo <- mantel(dist_geo, dist_gdd, method = "spearman", permutations = 9999, na.rm = TRUE) 
+init_geo <- mantel(dist_geo, dist_init, method = "spearman", permutations = 9999, na.rm = TRUE) 
+
+```
+                         
+```{r mantel_results}
+mantel_results <- data.frame(comp = c('ppt_geo', 'gdd_geo', "init_geo", 'bacabund_geo', 
+                                      'bacabund_ma', 'bacabund_ph',
+                                      'bacabund_ta', 'bacabund_nopa', 'bacabund_nh3', 
+                                      'bacabund_gdd', 'bacabund_ppt', 
+                                      'funabund_geo', 'funabund_ma', 'funabund_ph',
+                                      'funabund_ta', 'funabund_nopa', 'funabund_nh3', 
+                                      'funabund_bacabund', 'funabund_gdd', 
+                                      'funabund_ppt', 'transcriptomeabund_geo', 
+                                      'funabund_transcriptomeabund', 'transcriptomeabund_bacabund', 
+                                      'transcriptomeabund_ph', 'transcriptomeabund_ta',
+                                      'transcriptomeabund_ma', 'transcriptomeabund_nopa', 
+                                      'transcriptomeabund_nh3', 'transcriptomeabund_ppt',
+                                      'transcriptomeabund_gdd', 'ppt_ppt', 'gdd_gdd', 'geo_geo',
+                                      'init_init', 'ma_ma', "ph_ph", "nopa_nopa", "ta_ta", 
+                                      'nh3_nh3', "bacabund_bacabund", "funabund_funabund",
+                                      "transcriptomeabund_transcriptomeabund"),
+                             r = c(ppt_geo$statistic, gdd_geo$statistic, init_geo$statistic,
+                                   bac_abund_geo$statistic, bac_abund_ma$statistic, 
+                                   bac_abund_ph$statistic, bac_abund_ta$statistic, 
+                                   bac_abund_nopa$statistic, bac_abund_nh3$statistic, 
+                                   bac_abund_gdd$statistic, bac_abund_ppt$statistic, 
+                                   fun_abund_geo$statistic, fun_abund_ma$statistic,
+                                   fun_abund_ph$statistic, fun_abund_ta$statistic, 
+                                   fun_abund_nopa$statistic, fun_abund_nh3$statistic,
+                                   fun_abund_bac_abund$statistic, fun_abund_gdd$statistic, 
+                                   fun_abund_ppt$statistic, transcriptome_abund_geo$statistic, 
+                                   fun_abund_transcriptome_abund$statistic, transcriptome_abund_bac_abund$statistic, 
+                                   transcriptome_abund_ph$statistic, transcriptome_abund_ta$statistic,
+                                   transcriptome_abund_ma$statistic, transcriptome_abund_nopa $statistic,
+                                   transcriptome_abund_nh3$statistic, transcriptome_abund_ppt$statistic,
+                                   transcriptome_abund_gdd$statistic, rep(1, 12)),
+                             p = c(ppt_geo$signif, gdd_geo$signif, init_geo$signif,
+                                   bac_abund_geo$signif, bac_abund_ma$signif, 
+                                   bac_abund_ph$signif, bac_abund_ta$signif, 
+                                   bac_abund_nopa$signif, bac_abund_nh3$signif, 
+                                   bac_abund_gdd$signif, bac_abund_ppt$signif, 
+                                   fun_abund_geo$signif, fun_abund_ma$signif,
+                                   fun_abund_ph$signif, fun_abund_ta$signif, 
+                                   fun_abund_nopa$signif, fun_abund_nh3$signif, 
+                                   fun_abund_bac_abund$signif, fun_abund_gdd$signif, 
+                                   fun_abund_ppt$signif, transcriptome_abund_geo$signif, 
+                                   fun_abund_transcriptome_abund$signif, transcriptome_abund_bac_abund$signif, 
+                                   transcriptome_abund_ph$signif, transcriptome_abund_ta$signif, 
+                                   transcriptome_abund_ma$signif, transcriptome_abund_nopa$signif, 
+                                   transcriptome_abund_nh3$signif, transcriptome_abund_ppt$signif, 
+                                   transcriptome_abund_gdd$signif, rep(1, 12)))
+mantel_results <- mantel_results %>%
+  separate(comp, into = c("var1", "var2"), sep = "_") %>%
+  arrange(desc(r)) %>%
+  arrange(p) 
+
+mantel_results$fdr <- p.adjust(mantel_results$p, method = "fdr")
+```
+
+```{r mantelresults_format}
+mantel_results_plt <- data.frame(comp = c('bacabund_geo', 'bacabund_ma', 'bacabund_ph',
+                                          'bacabund_ta', 'bacabund_nopa', 'bacabund_nh3', 
+                                          'bacabund_gdd', 'bacabund_ppt', 
+                                          'funabund_geo', 'funabund_ma', 'funabund_ph',
+                                          'funabund_ta', 'funabund_nopa', 'funabund_nh3', 
+                                          'funabund_bacabund', 'funabund_gdd', 
+                                          'funabund_ppt', 'transcriptomeabund_geo', 
+                                          'funabund_transcriptomeabund', 'transcriptomeabund_bacabund', 
+                                          'transcriptomeabund_ph', 'transcriptomeabund_ta',
+                                          'transcriptomeabund_ma', 'transcriptomeabund_nopa', 
+                                          'transcriptomeabund_nh3', 'transcriptomeabund_ppt',
+                                          'transcriptomeabund_gdd'),
+                             r = c(bac_abund_geo$statistic, bac_abund_ma$statistic, 
+                                   bac_abund_ph$statistic, bac_abund_ta$statistic, 
+                                   bac_abund_nopa$statistic, bac_abund_nh3$statistic, 
+                                   bac_abund_gdd$statistic, bac_abund_ppt$statistic, 
+                                   fun_abund_geo$statistic, fun_abund_ma$statistic,
+                                   fun_abund_ph$statistic, fun_abund_ta$statistic, 
+                                   fun_abund_nopa$statistic, fun_abund_nh3$statistic,
+                                   fun_abund_bac_abund$statistic, fun_abund_gdd$statistic, 
+                                   fun_abund_ppt$statistic, transcriptome_abund_geo$statistic, 
+                                   fun_abund_transcriptome_abund$statistic, transcriptome_abund_bac_abund$statistic, 
+                                   transcriptome_abund_ph$statistic, transcriptome_abund_ta$statistic,
+                                   transcriptome_abund_ma$statistic, transcriptome_abund_nopa $statistic,
+                                   transcriptome_abund_nh3$statistic, transcriptome_abund_ppt$statistic,
+                                   transcriptome_abund_gdd$statistic),
+                             p = c(bac_abund_geo$signif, bac_abund_ma$signif, 
+                                   bac_abund_ph$signif, bac_abund_ta$signif, 
+                                   bac_abund_nopa$signif, bac_abund_nh3$signif, 
+                                   bac_abund_gdd$signif, bac_abund_ppt$signif, 
+                                   fun_abund_geo$signif, fun_abund_ma$signif,
+                                   fun_abund_ph$signif, fun_abund_ta$signif, 
+                                   fun_abund_nopa$signif, fun_abund_nh3$signif, 
+                                   fun_abund_bac_abund$signif, fun_abund_gdd$signif, 
+                                   fun_abund_ppt$signif, transcriptome_abund_geo$signif, 
+                                   fun_abund_transcriptome_abund$signif, transcriptome_abund_bac_abund$signif, 
+                                   transcriptome_abund_ph$signif, transcriptome_abund_ta$signif, 
+                                   transcriptome_abund_ma$signif, transcriptome_abund_nopa$signif, 
+                                   transcriptome_abund_nh3$signif, transcriptome_abund_ppt$signif, 
+                                   transcriptome_abund_gdd$signif))
+
+
+mantel_results_plt$fdr <- p.adjust(mantel_results_plt$p, method = "fdr")
+
+square_df <- data.frame(comp = c('ppt_ppt', 'gdd_gdd', 'geo_geo',
+                                 'ma_ma', "ph_ph", "nopa_nopa", "ta_ta", 
+                                 'nh3_nh3', "bacabund_bacabund", "funabund_funabund",
+                                 "transcriptomeabund_transcriptomeabund"),
+                        r = rep(1, 11),
+                        p = rep(1, 11),
+                        fdr = rep(1, 11))
+mantel_results_plt <- rbind(mantel_results_plt, square_df)
+
+# sep
+mantel_results_plt <- mantel_results_plt %>%
+  separate(comp, into = c("var1", "var2"), sep = "_")
+
+# add the diagnoal
+mantel_results_plt2 <- mantel_results_plt %>%
+  mutate(tmp = var2) %>%
+  mutate(var2 = var1) %>%
+  mutate(var1 = tmp) %>%
+  select(-tmp)
+
+mantel_results_plt <- mantel_results_plt %>%
+  rbind(mantel_results_plt2) %>%
+  distinct()
+
+# rm unwanted comparisons and make square
+mantel_results_plt_r <- mantel_results_plt %>%
+  select(-p, -fdr) %>%
+  pivot_wider(id_cols = "var1", names_from = "var2", values_from = "r") %>%
+  filter(var1 %in% c("bacabund", "funabund", "transcriptomeabund")) %>%
+  as.data.frame() %>%
+  column_to_rownames("var1") %>%
+  select("bacterial abundance" = bacabund, "fungal abundance" = funabund, 
+         "transcriptome abundance" = transcriptomeabund, "geography" = geo, 
+         "PPT" = ppt, "GDD" = gdd, "TA" = ta, "pH" = ph, "MA" = ma, 
+         "NOPA" = nopa, "NH3" = nh3)
+
+rownames(mantel_results_plt_r) <- c("bacterial abundance", "fungal abundance", "transcriptome abundance")
+# rm unwanted comparisons and make square
+mantel_results_plt_fdr <- mantel_results_plt %>%
+  select(-p, -r) %>%
+  pivot_wider(id_cols = "var1", names_from = "var2", values_from = "fdr") %>%
+  filter(var1 %in% c("bacabund", "funabund", "transcriptomeabund")) %>%
+  as.data.frame() %>%
+  column_to_rownames("var1") %>%
+  select("bacterial abundance" = bacabund, "fungal abundance" = funabund, 
+         "transcriptome abundance" = transcriptomeabund, "geography" = geo, 
+         "PPT" = ppt, "GDD" = gdd, "TA" = ta, "pH" = ph, "MA" = ma, 
+         "NOPA" = nopa, "NH3" = nh3)
+```
+
+```{r mantel_plt}
+mantel_plt <- ggcorrplot(mantel_results_plt_r, type = "upper", show.diag = F, lab = T, 
+                         lab_size = 3, lab_col = "white", tl.cex = 9, show.legend = T, legend.title = "correlation",
+                         p.mat = mantel_results_plt_fdr, sig.level = 0.1, insig = "blank",
+                         colors = c("#440154FF", "#1F968BFF", "#FDE725FF")) + 
+  theme(panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        panel.grid = element_blank(),
+        legend.key=element_blank(),
+        legend.position = "bottom") 
+mantel_plt
+```
+
+```{mantel_and_corrplts}
+# plot correlation of variables.
+init <- info %>%
+  dplyr::select(Brix = initial_brix, pH = initial_ph, TA = initial_TA,
+                NOPA = initial_nopa, NH3 = initial_nh3, MA = initial_MA, 
+                longitude = lon, latitude = lat, GDD = total_gdd_c, 
+                PPT = total_ppt)
+corr_init <- cor(init)
+cor_init_plt <- ggcorrplot(corr_init, type = "upper", show.diag = F, lab = T, 
+                           lab_size = 3, lab_col = "white", tl.cex = 9, 
+                           show.legend = F, p.mat = cor_pmat(init), sig.level = .1,
+                           insig = "blank", 
+                           colors = c("#440154FF", "#1F968BFF", "#FDE725FF")) + 
+  theme(panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        panel.grid = element_blank())
+
+ggarrange(cor_init_plt, mantel_plt, labels = c("A", "B"),  nrow = 1)
+```
+
+## *S. cerevisiae* gene expression provides insight into vineyard site and region features
+
+### com2 regulon & flavor
+
+```{r varimp_functions}
+read_varimp <- function(optimal_rf_rds){
+  imp <- readRDS(optimal_rf_rds)$variable.importance
+  imp <- imp %>%
+    as.data.frame() %>%
+    rownames_to_column("gene") 
+  colnames(imp) <- c("gene", "importance")
+  return(imp)
+}
+```
+
+```{r reference_genes}
+flavor <- read_csv("reference_genes/flavor_genes_doi_10.1007_s00253-012-4370-z.csv")
+volatile_sulfur <- filter(flavor, category == "volatile_sulfur")
+ehrlich_pathway <- filter(flavor, category == "higher_alcohols_and_volatile_fatty_acids")
+
+com2 <- read_csv("reference_genes/com2_suptab4.csv")
+
+# write out as supp tabs
+write_tsv(flavor, "supplementary_tables/table_S5_flavor_genes.tsv")
+write_tsv(com2 %>% filter(!is.na(ORF)) %>% select(gene, ORF, Function),
+          "supplementary_tables/table_S6_com2_regulon.tsv")
+```
+
+```{r site_var_imp}
+# read in model results
+files <- list.files("rna_seq/site_seeds/outputs", pattern = "^site_train70", full.names = T)
+files <- files[grepl(pattern = "RDS", files)]
+
+results_site <- files %>%
+  set_names() %>%
+  map_dfr(read_varimp, .id = "seed") %>%
+  mutate(seed = gsub("rna_seq\\/site_seeds\\/outputs\\/site_train70_optimal_rf_", "", seed)) %>%
+  mutate(seed = gsub("\\.RDS", "", seed)) %>%
+  filter(importance > 0) %>%
+  preprocess_df()
+```
+
+```{r write_site_var_imp}
+write_tsv(results_site, "supplementary_tables/table_S4_rf_100_site.tsv")
+```
+
+```{r flav_com2_site}
+# Flavor-associated genes
+flavor_per_model <- results_site %>%
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  filter(gene %in% flavor$ORF) %>%
+  select(gene, seed) %>%
+  distinct() %>%
+  group_by(seed) %>%
+  tally()
+cat("Average number of flavor-associated genes important for predicting site:")
+mean(flavor_per_model$n)
+cat("SD number of flavor-associated genes important for predicting site:")
+sd(flavor_per_model$n)
+
+volatile_sulfur_site <- results_site %>%
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  filter(gene %in% volatile_sulfur$ORF) %>%
+  select(gene, seed) %>%
+  distinct() %>%
+  group_by(seed) %>%
+  tally()
+cat("Average number volatile sulfur genes important for predicting site:")
+mean(volatile_sulfur_site$n)
+cat("SD volatile sulfur genes important for predicting site:")
+sd(volatile_sulfur_site$n)
+
+ehrlich_pathway_site <- results_site %>%
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  filter(gene %in% ehrlich_pathway$ORF) %>%
+  select(gene, seed) %>%
+  distinct() %>%
+  group_by(seed) %>%
+  tally()
+cat("Average number ehrlich pathway genes important for predicting site:")
+mean(ehrlich_pathway_site$n)
+cat("SD ehrlich pathway genes important for predicting site:")
+sd(ehrlich_pathway_site$n)
+
+# Com2 site
+
+com2_per_model <- results_site %>%
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  filter(gene %in% com2$ORF) %>%
+  select(gene, seed) %>%
+  distinct() %>%
+  group_by(seed) %>%
+  tally()
+cat("Average number of genes in the Com2 regulon important for predicting site:")
+mean(com2_per_model$n)
+cat("SD of genes in the Com2 regulon important for predicting site:")
+sd(com2_per_model$n)
+```
+
+```{r ava_var_imp}
+# read in model results
+files <- list.files("rna_seq/ava_seeds/outputs", pattern = "^ava_train70", full.names = T)
+files <- files[grepl(pattern = "RDS", files)]
+
+results_ava <- files %>%
+  set_names() %>%
+  map_dfr(read_varimp, .id = "seed") %>%
+  mutate(seed = gsub("rna_seq\\/ava_seeds\\/outputs\\/ava_train70_optimal_rf_", "", seed)) %>%
+  mutate(seed = gsub("\\.RDS", "", seed)) %>%
+  filter(importance > 0) %>%
+  preprocess_df()
+```
+
+```{r write_ava_var_imp}
+write_tsv(results_ava,"supplementary_tables/table_S4_rf_100_ava.tsv")
+```
+
+```{r flav_com2_ava}
+# flavor-associated genes
+flavor_per_model <- results_ava %>%
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  filter(gene %in% flavor$ORF) %>%
+  select(gene, seed) %>%
+  distinct() %>%
+  group_by(seed) %>%
+  tally()
+cat("Average number of flavor-associated genes important for predicting AVA:")
+mean(flavor_per_model$n)
+cat("SD number of flavor-associated genes important for predicting AVA:")
+sd(flavor_per_model$n)
+
+volatile_sulfur_site <- results_ava %>%
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  filter(gene %in% volatile_sulfur$ORF) %>%
+  select(gene, seed) %>%
+  distinct() %>%
+  group_by(seed) %>%
+  tally()
+cat("Average number volatile sulfur genes important for predicting AVA:")
+mean(volatile_sulfur_site$n)
+cat("SD volatile sulfur genes important for predicting AVA:")
+sd(volatile_sulfur_site$n)
+
+ehrlich_pathway_site <- results_ava %>%
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  filter(gene %in% ehrlich_pathway$ORF) %>%
+  select(gene, seed) %>%
+  distinct() %>%
+  group_by(seed) %>%
+  tally()
+cat("Average number ehrlich pathway genes important for predicting AVA:")
+mean(ehrlich_pathway_site$n)
+cat("SD ehrlich pathway genes important for predicting AVA:")
+sd(ehrlich_pathway_site$n)
+
+# Com2 site
+
+com2_per_model <- results_ava %>%
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  filter(gene %in% com2$ORF) %>%
+  select(gene, seed) %>%
+  distinct() %>%
+  group_by(seed) %>%
+  tally()
+cat("Average number of genes in the Com2 regulon important for predicting AVA:")
+mean(com2_per_model$n)
+cat("SD of genes in the Com2 regulon important for predicting AVA:")
+sd(com2_per_model$n)
+```
+
+### local importance 
+
+```{r read_localimp_functions}
+read_localimp_site <- function(optimal_rf_rds){
+  local_imp_site <- readRDS(optimal_rf_rds)$variable.importance.local
+  # average local importance for each ava to determine most important variables
+  mean_local_imp <- local_imp_site %>%
+    t() %>%
+    as.data.frame() %>%
+    rownames_to_column("gene") %>%
+    select(gene, contains("OR"), contains("RRV"), 
+           contains("CRN"), contains("AV"), 
+           contains("AS"), contains("SMV"),
+           contains("SNC"), contains("SRH")) %>%
+    pivot_longer(cols = -gene, names_to = "fermentation", values_to = "local_imp") %>%
+    mutate(site = gsub("201[79]{1}_", "", fermentation)) %>%
+    mutate(site = gsub("_.*", "", site)) %>%
+    group_by(site, gene) %>%
+    summarize(mean_local_imp = mean(local_imp))
+}
+
+read_localimp_ava <- function(optimal_rf_rds){
+  local_imp_ava <- readRDS(optimal_rf_rds)$variable.importance.local
+  # average local importance for each ava to determine most important variables
+  mean_local_imp <- local_imp_ava %>%
+    t() %>%
+    as.data.frame() %>%
+    rownames_to_column("gene") %>%
+    select(gene, contains("OR"), contains("RRV"), 
+           contains("CRN"), contains("AV"), 
+           contains("AS"), contains("SMV"),
+           contains("SNC"), contains("SRH")) %>%
+    pivot_longer(cols = -gene, names_to = "fermentation", values_to = "local_imp") %>%
+    mutate(ava = gsub("201[79]{1}_", "", fermentation)) %>%
+    mutate(ava = gsub("_.*", "", ava)) %>%
+    group_by(ava, gene) %>%
+    summarize(mean_local_imp = mean(local_imp))
+}
+```
+
+```{r ava_local_importance}
+files <- list.files("rna_seq/ava_seeds/outputs", pattern = "^ava_train70", full.names = T)
+files <- files[grepl(pattern = "RDS", files)]
+
+results_ava <- files %>%
+  set_names() %>%
+  map_dfr(read_localimp_ava, .id = "seed") %>%
+  mutate(seed = gsub("rna_seq\\/ava_seeds\\/outputs\\/ava_train70_optimal_rf_", "", seed)) %>%
+  mutate(seed = gsub("\\.RDS", "", seed)) %>%
+  filter(mean_local_imp > 0) %>%
+  preprocess_df()
+```
+
+```{r ava_genes_in_all_seeds}
+genes_in_all_seeds_ava <- results_ava %>% 
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  select(ava, gene, seed, organism = org) %>%
+  distinct() %>%
+  group_by(ava, gene, organism) %>%
+  tally() %>%
+  filter(n == 100)
+
+# annotate genes
+orfs <- orf_to_common(genes_in_all_seeds_ava$gene)
+genes_in_all_seeds_ava <- left_join(genes_in_all_seeds_ava, orfs, by = c("gene" = "ORF"))
+
+write_tsv(genes_in_all_seeds_ava, "supplementary_tables/table_S7_rf_100_shared_genes_ava.tsv")
+
+# plot an "accumulation curve" showing how many genes are present in each seed
+accum_no_qual <- results_ava %>% 
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  select(ava, gene, seed) %>%
+  distinct() %>%
+  group_by(ava, gene) %>%
+  tally() %>%
+  ungroup %>%
+  group_by(n) %>%
+  tally()
+
+ggplot(accum_no_qual, aes(x = n, y = nn)) + 
+  geom_point() +
+  scale_y_log10() +
+  labs(x = "Number of models", y = "Number of genes with local importance") +
+  theme_bw()
+
+#number consistent genes per AVA
+cat("Mean number of consistent genes per AVA")
+genes_in_all_seeds_ava %>% 
+  group_by(ava) %>% 
+  tally() %>%
+  summarize(mean(n))
+  
+cat("SD consistent genes per AVA")
+genes_in_all_seeds_ava %>% 
+  group_by(ava) %>% 
+  tally() %>%
+  summarize(sd(n))
+
+# number per AVA expressd by S. cerevisiae
+cat("Mean number of consistent genes per AVA expressed by S. cerevisiae")
+genes_in_all_seeds_ava %>% 
+  filter(is.na(DESCRIPTION)) %>%
+  group_by(ava) %>% 
+  tally() %>%
+  summarize(mean(n))
+
+cat("SD consistent genes per AVA expressed by S. cerevisiae")
+genes_in_all_seeds_ava %>% 
+  filter(is.na(DESCRIPTION)) %>%
+  group_by(ava) %>% 
+  tally() %>%
+  summarize(sd(n))
+```
+
+```{r site_local_importance}
+files <- list.files("rna_seq/site_seeds/outputs", pattern = "^site_train70", full.names = T)
+files <- files[grepl(pattern = "RDS", files)]
+
+results_site <- files %>%
+  set_names() %>%
+  map_dfr(read_localimp_site, .id = "seed") %>%
+  mutate(seed = gsub("rna_seq\\/site_seeds\\/outputs\\/site_train70_optimal_rf_", "", seed)) %>%
+  mutate(seed = gsub("\\.RDS", "", seed)) %>%
+  filter(mean_local_imp > 0) %>%
+  preprocess_df()
+```
+
+```{r genes_in_all_seeds_site}
+genes_in_all_seeds_site <- results_site %>% 
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  select(site, gene, seed, organism = org) %>%
+  distinct() %>%
+  group_by(site, gene, organism) %>%
+  tally() %>%
+  filter(n == 100)
+
+cat("Genes that were important for predicting vineyard site in all models:")
+genes_in_all_seeds_site
+
+
+# accumulation curve showing that number of genes shared per site does not saturate
+accum_site <- results_site %>% 
+  mutate(gene = gsub("_mean", "", gene)) %>%
+  mutate(gene = gsub("_min", "", gene)) %>%
+  mutate(gene = gsub("_max", "", gene)) %>%
+  mutate(gene = gsub("_deviation", "", gene)) %>%
+  mutate(gene = gsub("_raw", "", gene)) %>%
+  select(site, gene, seed) %>%
+  distinct() %>%
+  group_by(site, gene) %>%
+  tally() %>%
+  ungroup %>%
+  group_by(n) %>%
+  tally()
+
+ggplot(accum_site, aes(x = n, y = nn)) + 
+  geom_point() +
+  labs(x = "Number of models", y = "Number of genes with local importance") +
+  scale_y_log10() +
+  theme_bw()
+```
+
+\newpage
+# Supplementary material {-}
+
+\beginsupplement
+
+```{r alphadiversity}
+fun_alpha <- plot_richness(fun_physeq, x="ava_id", measures=c("Chao1", "Shannon"), color = "year") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90),
+        axis.title = element_blank(), 
+        strip.text = element_text(face = "bold")) +
+  geom_boxplot(color = "grey", outlier.color = NULL, outlier.shape = NA) +
+  scale_color_manual(values = c("2016"="black", "2017" = "darkgrey", "2019"= "lightgrey"))
+
+bac_alpha <- plot_richness(bac_physeq, x="ava_id", measures=c("Chao1", "Shannon"), color = "year") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90),
+        axis.title = element_blank(),
+        strip.text = element_text(face = "bold")) +
+  geom_boxplot(color = "grey", outlier.color = NULL, outlier.shape = NA) +
+  scale_color_manual(values = c("2016"="black", "2017" = "darkgrey", "2019"= "lightgrey"))
+
+ggarrange(bac_alpha, fun_alpha, labels = c("", ""), common.legend = T,
+          nrow = 2, legend = "bottom")
+```
+
+```{r make_heatmap_of_orgs, include = F}
+annotation_colors = list(
+  year = c("2016"="black", "2017" = "darkgrey", "2019"= "lightgrey"),
+  ava = c("OR"=or,  "AV" = av, "SNC" = snc, "RRV" = rrv, "CRN" = crn,
+          "AS" = as, "SMV" = smv, "SRH" = srh))
+
+bac_physeq_prune <- prune_taxa(taxa_sums(bac_physeq) > 0, bac_physeq)
+
+bac_heat <-plot_taxa_heatmap(bac_physeq_prune, subset.top = 20,
+    VariableA = c("ava", "year"),
+    show_colnames = F,
+    legend = F,
+    annotation_legend = F,
+    annotation_colors = annotation_colors,
+    fontsize_row = 6,
+    heatcolors = brewer.pal(9, "Blues"),
+    transformation = "log10")
+
+fun_physeq_prune <- prune_taxa(taxa_sums(fun_physeq) > 0, fun_physeq)
+tax_table(fun_physeq_prune) <- tax_table(fun_physeq_prune)[ , 1:7]
+fun_heat <-plot_taxa_heatmap(fun_physeq_prune, subset.top = 20,
+    VariableA = c("ava", "year"),
+    show_colnames = F,
+    annotation_colors = annotation_colors,
+    fontsize_row = 6,
+    heatcolors = brewer.pal(9, "Blues"),
+    transformation = "log10")
+```
+
+```{r heatmapoforgs}
+ggarrange(bac_heat[[4]], fun_heat[[4]],labels = c("A", "B"), widths = c(.87, 1))
+```
+
+
+```{r rfaccuracy}
+library(readxl)
+rf_acc <- read_excel("models.xls", sheet = "rf_classifiers") %>%
+  select(-acc_oth, -acc_diff) %>%
+  filter(!is.na(classifier)) %>%
+  select(-classifier) %>%
+  mutate(accuracy = round(accuracy, digits = 2))
+
+# ggtexttable(rf_acc, rows = NULL, theme = ttheme("light", padding = unit(c(1.5, 1.5), "mm"),
+#                                                 base_size = 10))
+
+kable(rf_acc, "latex", booktabs = T, linesep ="", caption = 'Accuracy of random forests classifiers.', 
+      digits = 2, col.names = c("data", "type", "validation set", "accuracy")) %>%
+  kable_styling(font_size = 9, latex_options ="striped", stripe_index =c(1:4, 9:12, 17:19))
+
+write_tsv(rf_acc, "supplementary_tables/table_S1_rf_accuracy.tsv")
+```
+
+## Accessions
+
+```{r accessiontable}
+# "D6D18" = "Aureobasidium pullulans" = "GCA_004917305.1"
+# "M438DRAFT" = "Aureobasidium pullulans" = "GCA_000721785.1"
+# "BCIN" ="Botrytis cinerea" = "GCA_000143535.4"
+# "BcDW1" ="Botrytis cinerea" = "GCA_000349525.1"
+# "PEGC" ="Cladosporium sp. SL-16" = "GCA_002921095.1"
+# "AWRI3578" ="Hanseniaspora opuntiae" = "GCA_001749795.1"
+# "D499" = "Hanseniaspora uvarum" = "GCA_000968475.1"
+# "KLTH0" = "Lachancea thermotolerans" = "GCF_000142805.1"
+# "metfru2" = "Metschnikowia fructicola" = "GCA_000317355.2"
+# "LPNK" ="Metschnikowia sp. AWRI3582" = "GCA_002894445.1"
+# "C5L36" = "Pichia kudriavzevii" = "GCA_003054445.1"
+# "CU098" = "Rhizopus stolonifer" = "GCA_003325415.1"
+# "scer" ="Saccharomyces cerevisiae" = "GCA_000146045.2"
+# "MWSF" = "Starmerella bacillaris" = "GCA_002024125.1"
+# "VIT" = "Vitis vinifera" = "GCA_000003745.2"
+
+# gene_prefix <- c("D6D18", "M438DRAFT","BCIN","BcDW1","BcDW1","PEGC","AWRI3578","D499","KLTH0","metfru2","LPNK","C5L36","CU098","scer","MWSF", "VIT")
+species_name <- c("Aureobasidium pullulans",  "Aureobasidium pullulans", "Botrytis cinerea", 
+                  "Botrytis cinerea","Cladosporium sp. SL-16", "Hanseniaspora opuntiae", 
+                  "Hanseniaspora uvarum",  "Lachancea thermotolerans",  
+                  "Metschnikowia fructicola",  "Metschnikowia sp. AWRI3582",
+                   "Pichia kudriavzevii",  "Rhizopus stolonifer", "Saccharomyces cerevisiae",
+                  "Starmerella bacillaris",   "Vitis vinifera")
+accession <- c("GCA_004917305.1", "GCA_000721785.1", "GCA_000143535.4", 
+               "GCA_000349525.1", "GCA_002921095.1", "GCA_001749795.1",
+               "GCA_000968475.1", "GCF_000142805.1", "GCA_000317355.2", 
+               "GCA_002894445.1", "GCA_003054445.1", "GCA_003325415.1", 
+               "GCA_000146045.2", "GCA_002024125.1", "GCA_000003745.2")
+
+org_accessions <- data.frame(species = species_name, accession = accession)
+
+# ggtexttable(org_accessions, rows = NULL, theme = ttheme("light", padding = unit(c(1.5, 1.5), "mm"),
+#                                                 base_size = 10))
+
+kable(org_accessions, "latex", booktabs = T, linesep ="",
+      caption = "GenBank genome accessions for organisms used to create reference transcriptome against which 3' Tag Seq RNA-seq reads were quantified.", digits = 2) %>%
+  kable_styling(font_size = 9, latex_options ="striped")
+
+write_tsv(org_accessions, "supplementary_tables/table_S8_accessions.tsv")
+```
+
+## Random forest model performance 
+
+```{r confusionmatricessite, fig.height=2.5}
+filt_site <- read_csv("rna_seq/site/site_vita_all_filt.csv")  %>% # read in site vita variables
+  mutate(site =  gsub("201[79]{1}_", "", X1)) %>%
+  mutate(site = gsub("_.*", "", site)) %>%
+  as.data.frame() %>%
+  column_to_rownames("X1")
+
+## separate years
+filt_site_19 <- grepl(pattern = "2019", x = rownames(filt_site))  # find 2019 samples
+filt_site_19 <- filt_site[filt_site_19, ]                         # filter to 2019 samples
+filt_site_17 <- grepl(pattern = "2017", x = rownames(filt_site))  # find 2017 samles
+filt_site_17 <- filt_site[filt_site_17, ]                         # filter to 2017 samples
+
+pred_site_19 <- predict(readRDS("rna_seq/site/site_2017train_optimal_rf.RDS"), filt_site_19) # read and predict with 2017 model
+cm_site_19 <- caret::confusionMatrix(data = pred_site_19$predictions, reference = as.factor(filt_site_19$site)) # generate confusion matrix
+plt_site_19 <- ggplotConfusionMatrix(cm_site_19, plot_title = "2017 model validated on 2019 vintage") +
+  theme(axis.text.x = element_text(angle = 90))
+
+pred_site_17 <- predict(readRDS("rna_seq/site/site_2019train_optimal_rf.RDS"), filt_site_17) # read and predict with 2019 model
+# plot pretty confusion matrix
+cm_site_17 <- caret::confusionMatrix(data = pred_site_17$predictions, reference = as.factor(filt_site_17$site)) # generate confusion matrix 
+plt_site_17<- ggplotConfusionMatrix(cm_site_17, plot_title = "2019 model validated on 2017 vintage") +
+  theme(axis.text.x = element_text(angle = 90))
+
+ggarrange(plt_site_17, plt_site_19, labels = c("", ""), ncol = 2)
+```
+
+```{r confusionmatricesava, fig.height=2.5}
+filt_ava <- read_csv("rna_seq/avas/ava_vita_all_filt.csv") %>%
+  mutate(ava =  gsub("_.*", "", X1)) %>%
+  as.data.frame() %>%
+  column_to_rownames("X1")
+
+## separate years
+filt_ava_19 <- grepl(pattern = "2019", x = rownames(filt_ava))  # find 2019 samples
+filt_ava_19 <- filt_ava[filt_ava_19, ] # filter to 2019 samples
+filt_ava_17 <- grepl(pattern = "2017", x = rownames(filt_ava)) # find 2017 samles
+filt_ava_17 <- filt_ava[filt_ava_17, ] # filter to 2017 samples
+
+pred_ava_19 <- predict(readRDS("rna_seq/avas/ava_train2017_optimal_rf.RDS"), filt_ava_19) # read and predict with 2017 model
+cm_ava_19 <- caret::confusionMatrix(data = pred_ava_19$predictions, reference = as.factor(filt_ava_19$ava)) # generate confusion matrix
+plt_ava_19 <- ggplotConfusionMatrix(cm_ava_19, plot_title = "2017 model validated on 2019 vintage")  +
+  theme(axis.text.x = element_text(angle = 90)) # plot confusion matrix
+
+pred_ava_17 <- predict(readRDS("rna_seq/avas/ava_train2019_optimal_rf.RDS"), filt_ava_17) # read and predict with 2019 model
+# plot pretty confusion matrix
+cm_ava_17 <- caret::confusionMatrix(data = pred_ava_17$predictions, reference = as.factor(filt_ava_17$ava)) # generate confusion matrix 
+plt_ava_17<- ggplotConfusionMatrix(cm_ava_17, plot_title = "2019 model validated on 2017 vintage") +
+  theme(axis.text.x = element_text(angle = 90))# plot confusion matrix
+
+ggarrange(plt_ava_17, plt_ava_19, labels = c(" ", " "), ncol = 2)
+```
+
+```{r confusion_matrices_amplicon_functions}
+plot_site_confusion <- function(optimal_rf_path, counts, validation_year, title){
+  #counts <- bac_dada
+  #validation_year = "19"
+  ## separate validation set 
+  counts <- as.data.frame(counts)
+  counts_train <- !grepl(pattern = validation_year, x = rownames(counts))
+  counts_train <- counts[counts_train, ]
+  counts_val <- grepl(pattern = validation_year, x = rownames(counts))
+  counts_val <- counts[counts_val, ]
+  
+  ## create vector with site information 
+  counts_train$site <- gsub("_[ABCD]{1}$", "", rownames(counts_train))
+  counts_train$site <- gsub("201[679]{1}_", "", counts_train$site)
+  counts_val$site <- gsub("_[ABCD]{1}$", "", rownames(counts_val))
+  counts_val$site <- gsub("201[679]{1}_", "", counts_val$site)
+  counts_train$site <- as.factor(counts_train$site)
+  counts_val$site <- factor(counts_val$site, levels = levels(counts_train$site))
+  
+  ## create confusion plt
+  optimal_rf_pred <- predict(readRDS(optimal_rf_path), counts_val) # read and predict with 2017 model
+  cm <- caret::confusionMatrix(data = optimal_rf_pred$predictions, reference = counts_val$site) # generate confusion matrix
+  plt <- ggplotConfusionMatrix(cm, plot_title = title) +
+    theme(axis.text.x = element_text(angle = 90))
+  plt
+}
+
+plot_ava_confusion <-  function(optimal_rf_path, counts, validation_year, title) {
+  #counts = bac_dada
+  # optimal_rf_path = "amplicon/bac/optimal_rf_ava_train1617.RDS"
+  ## separate years into train and validation sets
+  counts_train <- !grepl(pattern = validation_year, x = rownames(counts))
+  counts_train <- counts[counts_train, ]
+  counts_val <- grepl(pattern = validation_year, x = rownames(counts))
+  counts_val <- counts[counts_val, ]
+  
+  ## create vector with ava information 
+  counts_train$ava <- gsub("[1-3]_[ABCD]{1}$", "", rownames(counts_train))
+  counts_train$ava <- gsub("201[679]{1}_", "", counts_train$ava)
+  counts_val$ava <- gsub("[1-3]_[ABCD]{1}$", "", rownames(counts_val))
+  counts_val$ava <- gsub("201[679]{1}_", "", counts_val$ava)
+
+  counts_train$ava <- as.factor(counts_train$ava)
+  counts_val$ava <- factor(counts_val$ava, levels = levels(counts_train$ava))
+  
+  ## create confusion plt
+  optimal_rf_pred <- predict(readRDS(optimal_rf_path), counts_val) # read and predict with 2017 model
+  cm <- caret::confusionMatrix(data = optimal_rf_pred$predictions, reference = counts_val$ava) # generate confusion matrix
+  plt <- ggplotConfusionMatrix(cm, plot_title = title) +
+    theme(axis.text.x = element_text(angle = 90))
+  plt
+  }
+```
+
+
+```{r confusion_matrices_bacteria_data}
+# Import counts
+bac_dada <- read_tsv("~/github/pn_amp/2019/outputs/16s/dada2/ASV_counts.tsv") %>%
+  select(-`16mockcomm1a`, -`16mockcomm2a`, -`16mockcomm3a`, -`16negctrl1a`,  
+         -`16negctrl2a`, -`16negctrl3a`, -`17mockcomm1b`, -`17mockcomm2b`,
+         -`17mockcomm3b`, -`17negctrl1b`, -`17negctrl2b`,  -`17negctrl3b`, 
+         -`JFW_19-1-2`, -`JFW_19-19-2`, -`JFW_19-19-5`, -`JFW_19-2-2`, 
+         -`JFW_19-20-5`, -`JFW_19-23-5`, -`JFW_19-24-2`, -`JFW_19-24-5`,
+         -`negctrl2`, -`negctrl3`, -`negctrl4`, -`19CH-50FNH`,
+         -`19CH-50FOO`, -`19CH-50FPO`, -`19CH-70FOO`) %>%
+  filter(!X1 %in% bac_tax_contam$X1) %>%      # remove cholorplast and mitochondria
+  as.data.frame() %>%                         # read in DF
+  column_to_rownames("X1")                    # make ASVs rownames
+
+bac_dada <- sweep(bac_dada, 2, colSums(bac_dada),`/`) # make relative
+bac_dada <- t(bac_dada) # transpose
+bac_dada <- as.data.frame(bac_dada)
+```
+
+```{r confusion_matrices_site_bacteria, fig.height=2.5}
+plt_site_train1617 <- plot_site_confusion(optimal_rf_path = "amplicon/bac/optimal_rf_site_train1617.RDS",
+                                         counts = bac_dada, validation_year = "19", 
+                                         title = "16/17 train, 19 validate")
+
+plt_site_train1619 <- plot_site_confusion(optimal_rf_path = "amplicon/bac/optimal_rf_site_train1619.RDS",
+                                         counts = bac_dada, validation_year = "17", 
+                                         title = "16/19 train, 17 validate")
+
+plt_site_train1719 <- plot_site_confusion(optimal_rf_path = "amplicon/bac/optimal_rf_site_train1719.RDS",
+                                         counts = bac_dada, validation_year = "16", 
+                                         title = "17/19 train, 16 validate")
+
+ggarrange(plt_site_train1617, plt_site_train1619, plt_site_train1719,
+          labels = c("", "", ""), ncol = 3)
+```
+
+```{r confusion_matrices_ava_bacteria, fig.height=2.5 }
+plt_ava_train1617 <- plot_ava_confusion(optimal_rf_path = "amplicon/bac/optimal_rf_ava_train1617.RDS",
+                                        counts = bac_dada, validation_year = "19", 
+                                        title = "16/17 train, 19 validate")
+
+plt_ava_train1619 <- plot_ava_confusion(optimal_rf_path = "amplicon/bac/optimal_rf_ava_train1619.RDS",
+                                         counts = bac_dada, validation_year = "17", 
+                                         title = "16/19 train, 17 validate")
+
+plt_ava_train1719 <- plot_ava_confusion(optimal_rf_path = "amplicon/bac/optimal_rf_ava_train1719.RDS",
+                                         counts = bac_dada, validation_year = "16", 
+                                         title = "17/19 train, 16 validate")
+
+ggarrange(plt_ava_train1617, plt_ava_train1619, plt_ava_train1719,
+          labels = c("", "", ""), ncol = 3)
+```
+
+```{r confusion_matrices_fungi_data}
+# Import counts
+fun_dada <- read_tsv("~/github/pn_amp/2019/outputs/ITS/dada2/ASV_counts.tsv") %>%
+  select(-`16mockcomm1a`, -`16mockcomm2a`, -`16mockcomm3a`, -`16negctrl1a`,  
+         -`16negctrl2a`, -`16negctrl3a`, -`17mockcomm1b`, -`17mockcomm2b`,
+         -`17mockcomm3b`, -`17negctrl1b`, -`17negctrl2b`,  -`17negctrl3b`, 
+         -`JFW_19-1-2`, -`JFW_19-19-2`, -`JFW_19-19-5`, -`JFW_19-2-2`, 
+         -`JFW_19-20-5`, -`JFW_19-23-5`, -`JFW_19-24-2`, -`JFW_19-24-5`,
+         -`negctrl1`, -`negctrl2`, -`negctrl3`, -`negctrl4`, -`19CH-50FNH`,
+         -`19CH-50FOO`, -`19CH-50FPO`, -`19CH-70FOO`) %>%
+  as.data.frame() %>%
+  column_to_rownames("X1")
+
+fun_dada <- sweep(fun_dada, 2, colSums(fun_dada),`/`)
+fun_dada <- t(fun_dada) # transpose
+fun_dada <- as.data.frame(fun_dada)
+```
+
+```{r confusion_matrices_site_fungi, fig.height=2.5}
+plt_site_train1617 <- plot_site_confusion(optimal_rf_path = "amplicon/fungi/optimal_rf_site_train1617.RDS",
+                                         counts = fun_dada, validation_year = "19", 
+                                         title = "16/17 train, 19 validate")
+
+plt_site_train1619 <- plot_site_confusion(optimal_rf_path = "amplicon/fungi/optimal_rf_site_train1619.RDS",
+                                         counts = fun_dada, validation_year = "17", 
+                                         title = "16/19 train, 17 validate")
+
+plt_site_train1719 <- plot_site_confusion(optimal_rf_path = "amplicon/fungi/optimal_rf_site_train1719.RDS",
+                                         counts = fun_dada, validation_year = "16", 
+                                         title = "17/19 train, 16 validate")
+
+ggarrange(plt_site_train1617, plt_site_train1619, plt_site_train1719,
+          labels = c("", "", ""), ncol = 3)
+```
+
+```{r confusion_matrices_ava_fungi, fig.height=2.5 }
+plt_ava_train1617 <- plot_ava_confusion(optimal_rf_path = "amplicon/fungi/optimal_rf_ava_train1617.RDS",
+                                        counts = fun_dada, validation_year = "19", 
+                                        title = "16/17 train, 19 validate")
+
+plt_ava_train1619 <- plot_ava_confusion(optimal_rf_path = "amplicon/fungi/optimal_rf_ava_train1619.RDS",
+                                         counts = fun_dada, validation_year = "17", 
+                                         title = "16/19 train, 17 validate")
+
+plt_ava_train1719 <- plot_ava_confusion(optimal_rf_path = "amplicon/fungi/optimal_rf_ava_train1719.RDS",
+                                         counts = fun_dada, validation_year = "16", 
+                                         title = "17/19 train, 16 validate")
+
+ggarrange(plt_ava_train1617, plt_ava_train1619, plt_ava_train1719,
+          labels = c("", "", ""), ncol = 3)
+```
+
+
+```{r brix}
+brix17 <- read_csv("site_metadata/2017_fermentation_log.csv")
+brix19 <- read_csv("site_metadata/2019_fermentation_log.csv") 
+brix <- rbind(brix17, brix19) %>%
+  filter(!is.na(hours_post_innoculation))%>%
+  dplyr::select(-time) %>%
+  pivot_longer(cols = A:D, names_to = "tank", values_to = "brix") %>%
+  mutate(ava = gsub("[123]", "", ava_id))
+brix$highlight <- ifelse(brix$ava_id == "OR1", "OR1", "other site")
+brix_plot <- ggplot(brix, aes(y = brix, x = hours_post_innoculation, color = ava_id, shape = tank, label = ava_id)) +
+  geom_line() +
+  geom_point(aes(color = highlight), size = 3) +
+  facet_wrap(~year) +
+  labs(x = "time (hours)", y = "Brix", color = "vineyard", shape = "tank") +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90),
+        legend.title = element_text(size=12, face = "bold"),
+        legend.text = element_text(size = 9, colour = "black"),
+        legend.key=element_blank(),
+        strip.text.x = element_text(size = 12, face = "bold"),
+        strip.background = element_blank(),
+        panel.background = element_blank(), 
+        panel.grid =  element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2)) +
+  scale_color_manual(values = c(SRH1 = srh, SMV2 = smv, SMV1 = smv, AS1 = as, 
+                                AS2 = as, SNC1 = snc, SNC2 = snc, CRN1 = crn, 
+                                RRV1 = rrv, RRV2 = rrv, RRV3 = rrv, AV1 = av,
+                                AV2 = av, OR1 = or, OR2 = or, other_site = "grey"),
+                     breaks = c('OR1', 'OR2', 'AV1', 'AV2', 'RRV1', 'RRV2', 'RRV3', 'SNC1', 
+                                'SNC2', 'CRN1', 'AS1', 'AS2', 'SMV1', 'SMV2','SRH1')) +
+  scale_shape(guide = 'none')
+brix_plot
+```
+
+```{r nitrogen}
+info <- read_csv("samples_ava.csv")
+nitrogen <- info %>% 
+  filter(!is.na(tank)) %>%
+  select(ava_id, year, ava, initial_nh3, initial_nopa) %>%
+  distinct() %>%
+  pivot_longer(cols = starts_with("initial"), names_to = "variable", values_to = "values") %>%
+  mutate(variable = gsub("initial_nh3", "initial NH3", variable)) %>%
+  mutate(variable = gsub("initial_nopa", "initial NOPA", variable)) 
+
+nitrogen$ava_id <- factor(nitrogen$ava_id, 
+                          levels = c('OR1', 'OR2', 'AV1', 'AV2', 'RRV1', 
+                                     'RRV2', 'RRV3', 'SNC1', 'SNC2', 
+                                     'CRN1', 'AS1', 'AS2', 'SMV1', 
+                                     'SMV2','SRH1'))
+ggplot(nitrogen, aes(x = ava_id, y = values, fill = ava)) +
+  geom_col() +
+  facet_wrap(~year + variable, ncol = 4) +
+  labs(fill = "AVA") +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90),
+        legend.title = element_text(size=12, face ="bold"),
+        strip.text.x = element_text(size = 12, face = "bold"),
+        strip.background = element_blank(),
+        panel.background = element_blank(), 
+        panel.grid =  element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2)) +
+  scale_fill_manual(values = c(SRH = srh, SMV = smv,  
+                                AS = as, SNC = snc,  CRN = crn, 
+                                RRV = rrv, AV = av, OR = or),
+                    breaks = c('OR', 'AV', 'RRV', 'SNC', 'CRN', 'AS', 'SMV', 'SRH'))
+```
+
+```{r metals}
+metal17 <- read_csv("site_metadata/2017_elemental_profile.csv") %>%
+  dplyr::select(Vineyard, Year, Co, Fe, Rh)
+metal19 <- read_csv("site_metadata/2019_elemental_profile.csv")%>%
+  dplyr::select(Vineyard, Year, Co, Fe, Rh)
+metal <- rbind(metal17, metal19) %>%
+  pivot_longer(cols = Co:Rh, values_to = "concentration", names_to = "element") %>%
+  mutate(ava = gsub("[123]", "", Vineyard))
+metal$Vineyard <- factor(metal$Vineyard,
+                         levels = c('OR1', 'OR2', 'AV1', 'AV2', 'RRV1',
+                                    'RRV2', 'RRV3', 'SNC1', 'SNC2',
+                                    'CRN1', 'AS1', 'AS2', 'SMV1',
+                                    'SMV2','SRH1'))
+metal_plot <- ggplot(metal, aes(x = Vineyard, y = concentration, color = ava)) +
+  geom_point() +
+  facet_wrap(~Year + element, scales = "free") +
+  labs(color = "AVA") +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90),
+        legend.title = element_text(size=12, face = "bold"),
+        legend.text = element_text(size = 9, colour = "black"),
+        legend.key=element_blank(),
+        strip.text.x = element_text(size = 12, face = "bold"),
+        strip.background = element_blank(),
+        panel.background = element_blank(),
+        panel.grid =  element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2)) +
+  scale_color_manual(values = c(SRH = srh, SMV = smv,
+                                AS = as, SNC = snc,  CRN = crn,
+                                RRV = rrv, AV = av,OR = or),
+                     breaks = c('OR', 'AV', 'RRV', 'SNC', 'CRN',
+                                'AS', 'SMV','SRH'))
+
+
+metal_plot
+```
+
+## MISC ANALYSIS CODE
+
+Plot the ten genes with the highest variable importance for each model.
+
+```{r topvarimp, eval = F}
+top_imp_per_model <- function(optimal_rf_rds, num_top = 10){
+  tmp <- readRDS(optimal_rf_rds)$variable.importance 
+  # filter to variable importance > 0
+  df <- data.frame(gene = names(tmp), imp = tmp) 
+  
+  df <- preprocess_df(df)
+  
+  # bc we built RF with mean/min/max etc, sometimes the same gene can appear
+  # multiple times. Limit those genes to only occur in this representation once
+  df <- df %>%
+    group_by(gene) %>%
+    slice_max(order_by = imp, n = 1) %>%
+    ungroup() %>%
+    arrange(desc(imp)) %>%
+    top_n(imp, n = num_top)
+  
+  # annotate yeast with SGD
+  df_sac_cer <- df %>%
+    filter(org == "Saccharomyces cerevisiae") %>%
+    select(gene) %>%
+    distinct()
+  df_sac_cer <- orf_to_common(df_sac_cer$gene) %>%
+    ungroup() %>%
+    mutate(gene = ORF) %>%
+    mutate(ids = ORF) %>%
+    mutate(description = COMMON) %>%
+    select(gene, ids, description)
+  
+  # get annotations for the top ten most important genes
+  df_no_sac <- df %>%
+    filter(org != "Saccharomyces cerevisiae")
+  entrez_id_info_all <- data.frame()
+  for(i in unique(df_no_sac$gene)){
+    entrez_id <- try(entrez_search(db = "gene", term = i), TRUE) # query entrez with search term
+    if(isTRUE(class(entrez_id) =="try-error"))  # skip to next if there is not data for that id
+    { next } 
+    else { 
+      entrez_id <- unlist(entrez_id)[1] # extract id from entrez. select first arbitrarily
+      entrez_id_info <- try(entrez_summary(db = "gene", id = entrez_id), TRUE) # query entrez with id to get info
+      if(isTRUE(class(entrez_id_info) == "try-error")) # skip to next if no info
+      { next } else {
+        entrez_id_info <- data.frame(gene = i,
+                                     ids = entrez_id[1], 
+                                     description = entrez_id_info$description)
+        colnames(entrez_id_info) <- c("gene", "ids", "description")
+        entrez_id_info_all <- rbind(entrez_id_info_all, entrez_id_info) 
+      }
+    }
+  }
+  df <- left_join(df, entrez_id_info_all, by = "gene")
+  
+  df <- left_join(df, df_sac_cer, by = "gene") %>%
+    mutate(description = coalesce(description.x, description.y)) %>%
+    select(-description.x, -description.y) %>%
+    mutate(ids = coalesce(ids.x, ids.y)) %>%
+    select(-ids.x, -ids.y) 
+  
+  # use GTF for annotation for accessions that failed GenBank
+  gtf <- rtracklayer::import('rna_seq/pn_all_org_gtf/all.gtf.gz')
+  gtf <- as.data.frame(gtf)
+  
+  gtf_info_all <- data.frame()
+  for(i in 1:nrow(df)){
+    if(is.na(df$description[i])){
+      gene <- df$gene[i]
+      product <- unique(gtf[grep(gene, x = gtf$gene_id), "product"])
+      product <- product[!is.na(product)][1]
+      product_id <- unique(gtf[grep(gene, x = gtf$gene_id), "protein_id"])
+      product_id <- product_id[!is.na(product_id)][1]
+      gtf_info <- data.frame(gene = gene,
+                       ids = product_id, 
+                       description = product)
+    gtf_info_all <- rbind(gtf_info_all, gtf_info)
+    } else { next }
+  }
+  
+  df <- left_join(df, gtf_info_all, by = "gene") %>%
+    mutate(description = coalesce(description.x, description.y)) %>%
+    select(-description.x, -description.y) %>%
+    mutate(ids = coalesce(ids.x, ids.y)) %>%
+    select(-ids.x, -ids.y) 
+
+  return(df)
+}
+
+top_imp_17_site <- top_imp_per_model("rna_seq/site/site_2017train_optimal_rf.RDS")
+top_imp_19_site <- top_imp_per_model("rna_seq/site/site_2019train_optimal_rf.RDS")
+top_imp_all_site <- top_imp_per_model("rna_seq/site/site_train70_optimal_rf.RDS", num_top = 100)
+top_imp_17_ava <- top_imp_per_model("rna_seq/avas/ava_train2017_optimal_rf.RDS")
+top_imp_19_ava <-  top_imp_per_model("rna_seq/avas/ava_train2019_optimal_rf.RDS")
+top_imp_all_ava <- top_imp_per_model("rna_seq/avas/ava_train70_optimal_rf.RDS", num_top = 100)
+```
+
+```{r plttopvarimp, eval = F}
+top_imp_17_ava$model <- "ava_17"
+top_imp_17_site$model <- "site_17"
+top_imp_19_ava$model <- "ava_19"
+top_imp_19_site$model <- "site_19"
+top_imp_all_ava$model <- "ava_all"
+top_imp_all_site$model <- "site_all"
+
+top_imp <- rbind(top_imp_17_ava, top_imp_17_site, top_imp_19_ava,
+                 top_imp_19_site, top_imp_all_ava, top_imp_all_site)
+top_imp$description <- ifelse(is.na(top_imp$description), top_imp$gene, top_imp$description)
+ggplot(top_imp %>%
+         filter(model %in% c("ava_all", "site_all")) %>%
+         group_by(model) %>%
+         top_n(imp, n = 10), 
+       aes(x = reorder(description, imp), y = imp, fill = org)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~model, scales = "free", nrow = 2) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 8),
+        axis.text.y = element_text(colour = "black", size = 8), 
+        legend.title = element_text(size = 11, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 7, color = "black", face = "italic"),
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank(),
+        plot.title = element_text(hjust=0.5)) +
+  scale_fill_manual(name = "species",
+                    values = c("Hanseniaspora uvarum" = newblack, 
+                               "Metschnikowia fructicola" = mauve,
+                               "Metschnikowia sp. AWRI3582" = "pink",
+                               "Saccharomyces cerevisiae" = white_rock, "Starmerella bacillaris" = aqua, 
+                               "Vitis vinifera" = purple, "Cladosporium sp. SL-16" = "khaki",
+                               "Aureobasidium pullulans" = brown_grey, "Aureobasidium sp. FSWF8-4" = red,
+                               "Botryotinia fuckeliana" = grey, "Botrytis cinerea" = cyan, 
+                               "Hanseniaspora opuntiae" = selective_yellow, 
+                               "Hanseniaspora vineae" = grey_yellow,
+                               "Lachancea thermotolerans" = mint,
+                               "Pichia kudriavzevii" = steel_blue,
+                               "Rhizopus stolonifer" = viridian))
+
+```
+
+Plot ten genes with highest local importance for 6 most accuract sites
+
+```{r topimpsite, eval = F}
+top_local_imp_per_site <- function(mean_local_imp, num_top = 10){
+  df <- mean_local_imp %>%
+    group_by(site) %>%
+    filter(mean_local_imp > 0)
+  df <- preprocess_df(df)
+  
+  # bc we built RF with mean/min/max etc, sometimes the same gene can appear
+  # multiple times. Limit those genes to only occur in this representation once
+  df <- df %>%
+    group_by(site, gene) %>%
+    top_n(wt = mean_local_imp, n = 1) %>%
+    ungroup() %>%
+    distinct()
+  
+  df <- df %>%
+    group_by(site) %>%
+    arrange(desc(mean_local_imp)) %>%
+    top_n(mean_local_imp, n = num_top)
+  
+  # annotate yeast with SGD
+  df_sac_cer <- df %>%
+    filter(org == "Saccharomyces cerevisiae") %>%
+    select(gene) %>%
+    distinct()
+  
+  df_sac_cer <- orf_to_common(df_sac_cer$gene) %>%
+    ungroup() %>%
+    mutate(gene = ORF) %>%
+    mutate(ids = ORF) %>%
+    mutate(description = COMMON) %>%
+    select(gene, ids, description)
+  
+  # get annotations for the top ten most important genes
+  df_no_sac <- df %>%
+    filter(org != "Saccharomyces cerevisiae")
+  entrez_id_info_all <- data.frame()
+  for(i in unique(df_no_sac$gene)){
+    entrez_id <- try(entrez_search(db = "gene", term = i), TRUE) # query entrez with search term
+    if(isTRUE(class(entrez_id) =="try-error"))  # skip to next if there is not data for that id
+    { next } 
+    else { 
+      entrez_id <- unlist(entrez_id)[1] # extract id from entrez. select first arbitrarily
+      entrez_id_info <- try(entrez_summary(db = "gene", id = entrez_id), TRUE) # query entrez with id to get info
+      if(isTRUE(class(entrez_id_info) == "try-error")) # skip to next if no info
+      { next } else {
+        entrez_id_info <- data.frame(gene = i,
+                                     ids = entrez_id[1], 
+                                     description = entrez_id_info$description)
+        colnames(entrez_id_info) <- c("gene", "ids", "description")
+        entrez_id_info_all <- rbind(entrez_id_info_all, entrez_id_info) 
+      }
+    }
+  }
+  df <- left_join(df, entrez_id_info_all, by = "gene")
+  
+  df <- left_join(df, df_sac_cer, by = "gene") %>%
+    mutate(description = coalesce(description.x, description.y)) %>%
+    select(-description.x, -description.y) %>%
+    mutate(ids = coalesce(ids.x, ids.y)) %>%
+    select(-ids.x, -ids.y) 
+  
+  # use GTF for annotation for accessions that failed GenBank
+  gtf <- rtracklayer::import('rna_seq/pn_all_org_gtf/all.gtf.gz')
+  gtf <- as.data.frame(gtf)
+  
+  gtf_info_all <- data.frame()
+  for(i in 1:nrow(df)){
+    if(is.na(df$description[i])){
+      gene <- df$gene[i]
+      product <- unique(gtf[grep(gene, x = gtf$gene_id), "product"])
+      product <- product[!is.na(product)][1]
+      product_id <- unique(gtf[grep(gene, x = gtf$gene_id), "protein_id"])
+      product_id <- product_id[!is.na(product_id)][1]
+      gtf_info <- data.frame(gene = gene,
+                       ids = product_id, 
+                       description = product)
+    gtf_info_all <- rbind(gtf_info_all, gtf_info)
+    } else { next }
+  }
+  
+  df <- left_join(df, gtf_info_all, by = "gene") %>%
+    mutate(description = coalesce(description.x, description.y)) %>%
+    select(-description.x, -description.y) %>%
+    mutate(ids = coalesce(ids.x, ids.y)) %>%
+    select(-ids.x, -ids.y) 
+
+  return(df)
+}
+top_imp_site <- top_local_imp_per_site(mean_local_imp = mean_local_imp, num_top = 10)
+```
+
+```{r plttopimpsite, eval = F}
+top_imp_site$description <- ifelse(is.na(top_imp_site$description), top_imp_site$gene, top_imp_site$description)
+top_imp_site$description <- ifelse(top_imp_site$description == "hypothetical protein", top_imp_site$gene, top_imp_site$description)
+top_imp_site$site <- factor(top_imp_site$site, levels = c("OR1", "RRV1", "RRV3", "AV2", "AS2", "SMV2"))
+ggplot(top_imp_site, aes(x = reorder(description, mean_local_imp), y = mean_local_imp, fill = org)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~site, scales = "free", nrow = 3) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, colour = "black", size = 6),
+        axis.text.y = element_text(colour = "black", size = 6), 
+        legend.title = element_text(size = 10, colour = "black", face = "bold"), 
+        legend.text = element_text(size = 6, color = "black", face = "italic"),
+        panel.background = element_blank(), 
+        panel.border = element_rect(colour = "black", fill = NA, size = 1.2),
+        legend.key=element_blank(),
+        plot.title = element_text(hjust=0.5)) +
+  scale_fill_manual(name = "species",
+                    values = c("Hanseniaspora uvarum" = newblack, 
+                               "Metschnikowia fructicola" = mauve,
+                               "Metschnikowia sp. AWRI3582" = "pink",
+                               "Saccharomyces cerevisiae" = white_rock, "Starmerella bacillaris" = aqua, 
+                               "Vitis vinifera" = purple, "Cladosporium sp. SL-16" = "khaki",
+                               "Aureobasidium pullulans" = brown_grey, "Aureobasidium sp. FSWF8-4" = red,
+                               "Botryotinia fuckeliana" = grey, "Botrytis cinerea" = cyan, 
+                               "Hanseniaspora opuntiae" = selective_yellow, 
+                               "Hanseniaspora vineae" = grey_yellow,
+                               "Lachancea thermotolerans" = mint,
+                               "Pichia kudriavzevii" = steel_blue, 
+                               "Preussia sp." = orange, "Rhizopus stolonifer" = viridian))
+```
