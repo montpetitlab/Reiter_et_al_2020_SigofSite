@@ -2029,6 +2029,24 @@ ggplot(accum_site, aes(x = n, y = nn)) +
   theme_bw()
 ```
 
+```{r initial_yan}
+info <- read_csv("samples_ava.csv") %>%
+  select(ts_sum_id, initial_yan, initial_nopa, initial_nh3, ava) %>% 
+  filter(!is.na(ts_sum_id)) %>%
+  distinct() 
+
+info$ava <- factor(info$ava, levels = c("OR", "AV", "RRV", "SNC", "SRH", "CRN", "SMV", "AS"))
+ggplot(info, aes(x = ava, y =initial_yan, fill = ava)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  stat_summary(fun ="mean")+
+  labs(y = "Initial YAN", x = "", fill = "AVA") +
+  theme(panel.grid = element_blank()) +
+  scale_fill_manual(values = c(SRH = srh, SMV = smv,  
+                               AS = as, SNC = snc,  CRN = crn, 
+                               RRV = rrv, AV = av, OR = or))
+```
+
 \newpage
 # Supplementary material {-}
 
